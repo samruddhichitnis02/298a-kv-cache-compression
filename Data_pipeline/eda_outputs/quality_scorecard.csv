@@ -1,0 +1,17 @@
+task,completeness,validity,uniqueness,consistency,fitness,DQI,grade
+narrativeqa,1.0,1.0,0.91,1.0,0.55,91.90000000000002,Good
+qasper,1.0,1.0,1.0,1.0,1.0,100.0,Excellent
+multifieldqa_en,1.0,0.9933333333333333,0.9933333333333333,1.0,1.0,99.73333333333333,Excellent
+hotpotqa,1.0,0.995,1.0,1.0,1.0,99.875,Excellent
+2wikimqa,1.0,1.0,1.0,1.0,1.0,100.0,Excellent
+musique,1.0,0.99,1.0,1.0,1.0,99.75,Excellent
+gov_report,1.0,1.0,1.0,1.0,0.985,99.77500000000002,Excellent
+qmsum,1.0,1.0,1.0,1.0,1.0,100.0,Excellent
+multi_news,1.0,0.255,1.0,1.0,1.0,81.37500000000001,Needs work
+trec,1.0,1.0,1.0,1.0,1.0,100.0,Excellent
+triviaqa,1.0,0.65,1.0,1.0,1.0,91.25000000000001,Good
+samsum,1.0,0.975,1.0,1.0,1.0,99.375,Excellent
+passage_count,1.0,1.0,1.0,1.0,1.0,100.0,Excellent
+passage_retrieval_en,1.0,1.0,1.0,1.0,1.0,100.0,Excellent
+lcc,1.0,1.0,1.0,0.0,1.0,85.00000000000001,Good
+repobench-p,1.0,0.512,1.0,0.0,0.984,72.55999999999999,Needs work

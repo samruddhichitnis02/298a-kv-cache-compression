@@ -1,0 +1,17 @@
+task,unique_documents,max_questions_per_document,documents_with_2plus_questions
+narrativeqa,20,19,20
+qasper,148,3,43
+multifieldqa_en,112,4,29
+hotpotqa,200,1,0
+2wikimqa,200,1,0
+musique,200,1,0
+gov_report,200,1,0
+qmsum,35,11,34
+multi_news,200,1,0
+trec,200,1,0
+triviaqa,200,1,0
+samsum,200,1,0
+passage_count,200,1,0
+passage_retrieval_en,200,1,0
+lcc,500,1,0
+repobench-p,500,1,0

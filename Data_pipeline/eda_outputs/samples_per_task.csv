@@ -1,0 +1,17 @@
+task,n_samples,category,metric
+narrativeqa,200,Single-Doc QA,F1
+qasper,200,Single-Doc QA,F1
+multifieldqa_en,150,Single-Doc QA,F1
+hotpotqa,200,Multi-Doc QA,F1
+2wikimqa,200,Multi-Doc QA,F1
+musique,200,Multi-Doc QA,F1
+gov_report,200,Summarization,ROUGE-L
+qmsum,200,Summarization,ROUGE-L
+multi_news,200,Summarization,ROUGE-L
+trec,200,Few-shot,Classification score
+triviaqa,200,Few-shot,F1
+samsum,200,Few-shot,ROUGE-L
+passage_count,200,Synthetic,Accuracy
+passage_retrieval_en,200,Synthetic,Accuracy
+lcc,500,Code,Edit similarity
+repobench-p,500,Code,Edit similarity

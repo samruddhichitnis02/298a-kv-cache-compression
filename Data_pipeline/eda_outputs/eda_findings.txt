@@ -1,0 +1,7 @@
+1. The dataset has 3,750 English records across 16 tasks and 6 categories.
+2. Median context length ranges from 883 words (lcc) to 17,499 words (narrativeqa).
+3. About 2.7% of all samples exceed the 32,000-token cap (estimated with tiktoken cl100k_base (approximation)); the most affected task is narrativeqa.
+4. Required-field defects found: 0. Duplicate ids: 0. Duplicate document-question pairs: 19.
+5. 4 tasks contain documents with two or more questions, which helps build the second-question set for the multi-turn test (R10).
+6. The dev subset (800 items) is length-representative for 16 of 16 tasks (KS test, p > 0.05).
+7. Overall Data Quality Index: 92.4/100. Best task: qasper (100.0); lowest task: repobench-p (72.6).
