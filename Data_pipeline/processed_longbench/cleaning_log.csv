@@ -1,0 +1,8 @@
+stage,rows_before,rows_after,rows_removed,reason
+required_record_id,3750,3750,0,record ID must be present
+required_context,3750,3750,0,context must be present
+required_answers,3750,3750,0,at least one answer is required
+language_scope,3750,3750,0,retain English tasks and selected code-completion tasks
+known_task,3750,3750,0,task must be included in the project registry
+duplicate_id,3750,3750,0,retain the first record for each record ID
+duplicate_task_context_input,3750,3731,19,retain the first duplicate document-question pair
