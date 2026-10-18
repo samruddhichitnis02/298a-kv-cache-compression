@@ -75,6 +75,11 @@ def main():
     rows = []
     for name in args.presses.split(","):
         press = make_press(name, args.compression_ratio)
+        if isinstance(press, RestoreKVPress):
+            # Load the LoRA adapter now and move it to the model's device; otherwise it
+            # is created on the CPU when the pipeline runs on Apple GPUs (mps).
+            press.post_init_from_model(pipe.model)
+            pipe.model.to(device)
         if device == "cuda":
             torch.cuda.empty_cache()
             torch.cuda.reset_peak_memory_stats()
