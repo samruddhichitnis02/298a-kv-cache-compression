@@ -63,6 +63,20 @@ def split_prompt(record):
     return prompt[:cut], prompt[cut:]
 
 
+def split_answer_cue(question):
+    """Split the question so that kvpress's no-template join (question + "\\n" + answer_prefix) rebuilds it exactly.
+
+    Without a chat template kvpress always inserts a newline before the answer
+    prefix. Left in place, "...Type:" becomes "...Type:\\n" and the model starts
+    a new few-shot example instead of answering, so the last line (the answer
+    cue) is passed as the answer prefix instead.
+    """
+    if question.endswith("\n"):
+        return question[:-1], ""
+    head, _, cue = question.rpartition("\n")
+    return head, cue
+
+
 def normalize_answer(s):
     s = s.lower()
     s = "".join(ch for ch in s if ch not in set(string.punctuation))

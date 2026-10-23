@@ -90,10 +90,13 @@ def main():
             # (kvpress needs one; Llama has it, some small test models such as Qwen do not)
             no_template = record["task"] in longbench.NO_CHAT_TEMPLATE_TASKS and pipe.tokenizer.bos_token
             pipe.tokenizer.chat_template = None if no_template else chat_template
+            answer_prefix = ""
+            if no_template:
+                question, answer_prefix = longbench.split_answer_cue(question)
             if device == "cuda":
                 torch.cuda.reset_peak_memory_stats()
             start = time.perf_counter()
-            prediction = pipe(context, question=question, press=press,
+            prediction = pipe(context, question=question, answer_prefix=answer_prefix, press=press,
                               max_new_tokens=longbench.MAX_NEW_TOKENS[record["task"]])["answer"]
             seconds = time.perf_counter() - start
             row = {
