@@ -22,7 +22,7 @@ import torch
 from datasets import load_dataset
 from transformers import pipeline
 
-from run_longbench import make_press, pick_device
+from run_longbench import kv_cache_gb, make_press, pick_device
 
 REPO = Path(__file__).resolve().parent.parent
 OUT_DIR = REPO / "results" / "ruler"
@@ -92,6 +92,8 @@ def main():
                 "answers": example["answer"],
                 "score": ruler_score(example["task"], prediction, example["answer"]),
                 "seconds": round(seconds, 2),
+                "kv_cache_gb": kv_cache_gb(pipe, example["context"],
+                                           example["question"] + example["answer_prefix"], ratio),
                 "peak_gpu_gb": round(torch.cuda.max_memory_allocated() / 1e9, 2) if device == "cuda" else None,
             }
             out.write(json.dumps(row) + "\n")

@@ -40,6 +40,24 @@ def make_press(name, compression_ratio):
     return presses[name](compression_ratio=compression_ratio)
 
 
+def kv_bytes_per_token(config, bytes_per_value=2):
+    """Size of one token's keys and values across all layers (bf16 by default)."""
+    head_dim = getattr(config, "head_dim", None) or config.hidden_size // config.num_attention_heads
+    return 2 * config.num_hidden_layers * config.num_key_value_heads * head_dim * bytes_per_value
+
+
+def kv_cache_gb(pipe, context, question, ratio):
+    """KV cache kept after compression: the compressed context plus the uncompressed question.
+
+    Computed rather than measured, because some presses (KVzip, RestoreKV) only
+    mask evicted pairs and leave them in GPU memory.
+    """
+    n_context = len(pipe.tokenizer(context, add_special_tokens=False).input_ids)
+    n_question = len(pipe.tokenizer(question, add_special_tokens=False).input_ids)
+    kept = round((1 - ratio) * n_context) + n_question
+    return round(kept * kv_bytes_per_token(pipe.model.config) / 1e9, 4)
+
+
 def pick_device():
     if torch.cuda.is_available():
         return "cuda"
@@ -108,6 +126,7 @@ def main():
                 "prediction": prediction,
                 "score": longbench.score(record["task"], prediction, record["answers"], record["all_classes"]),
                 "seconds": round(seconds, 2),
+                "kv_cache_gb": kv_cache_gb(pipe, context, question + answer_prefix, ratio),
                 "peak_gpu_gb": round(torch.cuda.max_memory_allocated() / 1e9, 2) if device == "cuda" else None,
             }
             out.write(json.dumps(row) + "\n")
