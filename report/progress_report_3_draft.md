@@ -4,7 +4,7 @@ Team 6, KV-cache compression on Llama-3.1-8B-Instruct. Draft started Oct 22, 202
 
 ## 1. What changed since Progress Report 2
 
-- Narrowed the method list to one 2026-era method per member, plus SnapKV and KIVI as shared baselines (SAM-111).
+- Narrowed the method list to one 2026-era method per member, plus SnapKV and KIVI as shared baselines. The whole team agreed on Oct 22 (SAM-111).
 - Data pipeline finished: 3,731 cleaned LongBench records and an 800-record dev set, 50 per task (SAM-64).
 - Shared evaluation harness built and connected to the full-cache baseline (SAM-124, PR #47).
 
@@ -13,8 +13,10 @@ Team 6, KV-cache compression on Llama-3.1-8B-Instruct. Draft started Oct 22, 202
 | Anees | RestoreKV (arXiv 2608.01247) | Eviction + learned restoration | kvpress `RestoreKVPress`, released Llama-3.1-8B adapter |
 | Vedant | TurboQuant (arXiv 2504.19874, ICLR 2026) | Quantization | Community implementations |
 | Samruddhi | TriAttention (arXiv 2604.04921, ICML 2026); KVTC in spring | Token selection (pre-RoPE scoring) | github.com/WeianMao/triattention |
-| Charvee | *pending confirmation* (DeltaKV proposed, arXiv 2602.08005) | Residual compression | github.com/CURRENTF/DeltaKV |
-| Manjot | *pending confirmation* | | |
+| Charvee | DeltaKV (arXiv 2602.08005) | Residual compression | github.com/CURRENTF/DeltaKV, released Llama-3.1-8B compressor |
+| Manjot | RDKV (arXiv 2605.08317) | Joint eviction + quantization (rate-distortion bit allocation) | No public code yet; fallback HqeKV (ACL 2026 Findings) |
+
+Excluded or deferred: KVTC moves to spring (no public code; it compresses the cache for storage, not at runtime). DirectKV is kept as a systems reference (it needs GH200 hardware and is lossless).
 
 ## 2. Experimental setup
 
