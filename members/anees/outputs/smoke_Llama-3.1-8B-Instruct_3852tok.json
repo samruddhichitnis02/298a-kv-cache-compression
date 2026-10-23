@@ -1,0 +1,36 @@
+{
+  "args": {
+    "model": "meta-llama/Llama-3.1-8B-Instruct",
+    "presses": "none,kvzip,restorekv",
+    "tokens": 4000,
+    "compression_ratio": 0.9,
+    "depth": 0.5,
+    "code": "7341",
+    "max_new_tokens": 16
+  },
+  "device": "mps",
+  "context_tokens": 3852,
+  "results": [
+    {
+      "press": "none",
+      "answer": "7341",
+      "found_needle": true,
+      "seconds": 28.34,
+      "peak_gpu_gb": null
+    },
+    {
+      "press": "kvzip",
+      "answer": "7341",
+      "found_needle": true,
+      "seconds": 76.51,
+      "peak_gpu_gb": null
+    },
+    {
+      "press": "restorekv",
+      "answer": "7341",
+      "found_needle": true,
+      "seconds": 85.05,
+      "peak_gpu_gb": null
+    }
+  ]
+}
