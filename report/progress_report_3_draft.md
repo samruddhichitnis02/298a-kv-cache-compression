@@ -13,7 +13,7 @@ Team 6, KV-cache compression on Llama-3.1-8B-Instruct. Draft started Oct 22, 202
 | Anees | RestoreKV (arXiv 2608.01247) | Eviction + learned restoration | kvpress `RestoreKVPress`, released Llama-3.1-8B adapter |
 | Vedant | TurboQuant (arXiv 2504.19874, ICLR 2026) | Quantization | Community implementations |
 | Samruddhi | TriAttention (arXiv 2604.04921, ICML 2026); KVTC in spring | Token selection (pre-RoPE scoring) | github.com/WeianMao/triattention |
-| Charvee | DeltaKV (arXiv 2602.08005) | Residual compression | github.com/CURRENTF/DeltaKV, released Llama-3.1-8B compressor |
+| Charvee | ResidualKV, formerly DeltaKV (arXiv 2602.08005) | Residual compression | github.com/CURRENTF/DeltaKV (repo keeps the old name), released Llama-3.1-8B compressor |
 | Manjot | RDKV (arXiv 2605.08317) | Joint eviction + quantization (rate-distortion bit allocation) | No public code yet; fallback HqeKV (ACL 2026 Findings) |
 
 Excluded or deferred: KVTC moves to spring (no public code; it compresses the cache for storage, not at runtime). DirectKV is kept as a systems reference (it needs GH200 hardware and is lossless).
