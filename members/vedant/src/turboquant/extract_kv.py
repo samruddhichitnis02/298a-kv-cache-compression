@@ -33,7 +33,7 @@ def main() -> None:
     parser.add_argument("--output", type=Path, default=Path("results/real_kv/llama_kv.safetensors"))
     parser.add_argument("--max-input-tokens", type=int, default=4096)
     parser.add_argument("--device", default="auto")
-    parser.add_argument("--dtype", choices=["float16", "bfloat16", "float32"], default="float16")
+    parser.add_argument("--dtype", choices=["float16", "bfloat16", "float32"], default="bfloat16")
     parser.add_argument("--token")
     args = parser.parse_args()
 

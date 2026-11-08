@@ -37,7 +37,7 @@ The full matrix uses a fresh `results/longbench/` directory.
 turboquant-g3 --output-dir results/g3
 python -m pytest -q > results/pytest.txt
 turboquant-extract-kv --model "$MODEL" --prompt "Summarize the evidence." \
-  --output results/llama31_8b_kv.safetensors --dtype float16 --device cuda
+  --output results/llama31_8b_kv.safetensors --dtype bfloat16 --device cuda
 for layer in 0 15 31; do
   turboquant-real-kv results/llama31_8b_kv.safetensors \
     --key-name "layer_${layer}.keys" --value-name "layer_${layer}.values" \

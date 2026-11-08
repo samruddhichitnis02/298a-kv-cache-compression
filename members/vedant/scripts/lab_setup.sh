@@ -1,13 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Start in the repository root. No Conda or sudo is needed.
-python3 -m venv .venv
+# Run from members/vedant inside the lab container. No Conda or sudo is needed.
+# --system-site-packages keeps the lab image's torch 2.7.1+cu128 (built for the RTX 5090)
+# and transformers 5.2.0; pip then only adds the small extras (pytest, rouge, ...).
+python3 -m venv --system-site-packages .venv
 source .venv/bin/activate
-python -m pip install --upgrade pip
-# PyTorch CUDA wheels must match the lab driver and support sm_120 (RTX 5090).
-# If the lab already supplies compatible torch, create the venv with
-# --system-site-packages instead and preserve the lab's approved torch build.
 python -m pip install -e '.[dev,hf,plots,score]'
 mkdir -p results/environment
 nvidia-smi > results/environment/nvidia_smi.txt

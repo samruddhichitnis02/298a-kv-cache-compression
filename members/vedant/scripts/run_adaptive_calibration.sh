@@ -31,7 +31,7 @@ for sample in $(seq 0 $((sample_count - 1))); do
     --record-index "$record_index" \
     --max-input-tokens 1024 \
     --output "$tensor_path" \
-    --dtype float16 \
+    --dtype bfloat16 \
     --device cuda
   for layer in $(seq 0 31); do
     layer_dir="$sample_dir/layer_${layer}"

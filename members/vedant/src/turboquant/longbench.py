@@ -91,7 +91,7 @@ def main() -> None:
     parser.add_argument("--task", action="append")
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--device", default="auto")
-    parser.add_argument("--dtype", choices=["float16", "bfloat16", "float32"], default="float16")
+    parser.add_argument("--dtype", choices=["float16", "bfloat16", "float32"], default="bfloat16")
     parser.add_argument("--token")
     parser.add_argument("--revision")
     parser.add_argument(

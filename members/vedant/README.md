@@ -1,8 +1,32 @@
 # Team 6 TurboQuant
 
-**Team repository integration:** read [TEAM_INTEGRATION.md](TEAM_INTEGRATION.md)
-before running a cross-method comparison. The shared harness uses BF16 and
-protects question tokens; this standalone reference path still needs that integration.
+## Team comparison runs (shared harness)
+
+The numbers that go in the team's LongBench table come from the shared harness, through
+`turboquant_press.py`. It quantizes the document's keys and values with this package's
+`TurboQuantCacheLayer` after the document is processed at full precision, and leaves the
+question and answer in bf16, exactly as the other methods are run. Same 800 records,
+prompts, BF16 model and scorer (0–1) as the 47.72 full-cache baseline.
+
+```bash
+cd /app/298a-kv-cache-compression
+hf auth login
+bash members/vedant/scripts/run_harness_longbench.sh 2>&1 | tee -a turboquant.log
+```
+
+| `--press` | Keys | Values | Document cache vs bf16 |
+|---|---|---|---|
+| `turboquant_2bit` | 1-bit MSE + 1-bit QJL | 2-bit MSE | 13.7% |
+| `turboquant_3bit` | 2-bit MSE + 1-bit QJL | 3-bit MSE | 19.9% |
+| `turboquant_4bit` | 3-bit MSE + 1-bit QJL | 4-bit MSE | 26.2% |
+| `turboquant_mse_3bit` | 3-bit MSE | 3-bit MSE | 19.5% |
+| `turboquant_mse_4bit` | 4-bit MSE | 4-bit MSE | 25.8% |
+
+`kv_cache_gb` counts the packed document cache (codes plus fp16 norms) and the bf16
+question. Nothing to install in the lab: kvpress and transformers 5.2.0 are in the image.
+
+The standalone tools below (G3 gate, real-KV checks, adaptive allocation, context
+scaling) still run from this folder. See [TEAM_INTEGRATION.md](TEAM_INTEGRATION.md).
 
 Vedant's TurboQuant reference implementation and reproducible Team 6 experiment
 package. Version 0.2.0 prepares source code for GitHub; Llama 3.1 8B RTX 5090
@@ -24,7 +48,7 @@ or speedup is presented as a measured result.
 Python 3.11 or newer. Use a virtual environment; Conda is not required.
 
 ```bash
-python3 -m venv .venv
+python3 -m venv --system-site-packages .venv
 source .venv/bin/activate
 python -m pip install -e '.[dev,hf,plots,score]'
 python -m pytest -q
@@ -127,6 +151,6 @@ before intentionally adding them; do not force-add the entire results directory.
 - [Official LongBench](https://github.com/THUDM/LongBench)
 - [KIVI](https://github.com/jy-yuan/KIVI)
 
-The shared GitHub harness has now been inspected. Dataset and chat exceptions
-align; precision, prompt construction, protected question tokens and scorer-scale
-integration remain explicit follow-up work in `TEAM_INTEGRATION.md`.
+TurboQuant now runs in the shared harness (see the top of this file); the dataset
+file, chat exceptions, precision, prompt construction, protected question and scorer
+all match the other methods there.

@@ -21,7 +21,7 @@ plots = [
 ]
 hf = [
   "accelerate>=1.10",
-  "transformers==5.20.2",
+  "transformers>=5.2,<6",  # the lab image has 5.2.0; tested with 5.2.0
   "safetensors>=0.5",
 ]
 score = [

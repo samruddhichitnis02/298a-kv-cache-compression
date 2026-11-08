@@ -17,7 +17,7 @@ common_args=(
   --input "$data_path"
   --model "$model_id"
   --device cuda
-  --dtype float16
+  --dtype bfloat16
   --seed 42
   --max-input-tokens 32000
   --max-new-tokens-config configs/longbench_v1_max_new_tokens.json

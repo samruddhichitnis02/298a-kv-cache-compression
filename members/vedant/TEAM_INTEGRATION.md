@@ -1,57 +1,48 @@
 # Team harness integration status
 
-This is Vedant's locally validated TurboQuant reference package, version 0.2.0.
-It is an initial source-code contribution. RTX 5090 results and complete parity
-with the shared harness are pending. The shared runners are not modified by this
-contribution, and TurboQuant is not yet registered as a shared kvpress press.
+This is Vedant's TurboQuant reference package, version 0.2.0. TurboQuant is registered
+in the shared harness as `turboquant_{2,3,4}bit` and `turboquant_mse_{3,4}bit`
+(`turboquant_press.py`, `harness/run_longbench.py`). Use those runs for the team table.
 
-## Checked against the current team repository
+## Shared harness path vs standalone runner
 
-| Setting | Shared harness | Reference package |
+| Setting | Shared harness (`turboquant_*` presses) | Standalone `turboquant-longbench` |
 |---|---|---|
-| Dataset | Team processed LongBench dev file | Enforces frozen 800-record identity |
-| Source prompt | Preprocessed record prompt | Same source field |
-| Chat exceptions | trec, triviaqa, samsum, lcc, repobench-p | Same exceptions |
-| Precision | BF16 | Runner supports BF16 via `--dtype bfloat16`; matrix scripts currently select FP16 |
-| Compression boundary | Document compressible; question/instructions protected | Current adapter quantizes every cached token, including the question and generated suffix |
-| Prompt construction | kvpress document/question pipeline, answer-cue handling | Single formatted prompt with Transformers generation |
-| Scoring | Shared `harness/longbench.py`, scores in 0–1 | Pinned upstream metric functions, scores in 0–100 |
-| Code similarity | rapidfuzz | upstream fuzzywuzzy; backend results can differ |
-| Memory | Computed retained-token storage | Actual packed codes/norms plus separately reported quantizer overhead |
+| Dataset | Team 800-record dev file | Same file (SHA-256 checked) |
+| Prompt construction | Document as context, question split off, answer cue for no-template tasks | Single formatted prompt |
+| Precision | BF16 | BF16 by default (was FP16) |
+| What is quantized | Document keys and values only | Every cached token, including question and generated tokens |
+| Prefill attention | Full precision; stored cache quantized | Full precision for the tokens of each forward pass; stored cache quantized |
+| Scoring | `harness/longbench.py`, 0–1, rapidfuzz | Pinned upstream metrics, 0–100, fuzzywuzzy |
+| Memory | `kv_cache_gb`: packed document bytes + bf16 question | Packed bytes of the whole cache + quantizer state |
 
-## Required before cross-method results
+The two paths use the same `TurboQuantCacheLayer`, seeds and fp16 norms, so the document is
+quantized identically. Do not mix their scores in one table: the scorers differ in scale
+and in the code-similarity backend.
 
-1. Use the same BF16 model revision, tokenizer, generation settings and exact input token IDs.
-2. Integrate the shared document/question construction and protect the question
-   and generated suffix, or agree on a common alternate protocol for all methods.
-   Include all protected-token bytes in the memory budget.
-3. Re-score all predictions with one chosen scorer and scale. Do not concatenate
-   shared 0–1 scores with this package's 0–100 scores. Do not assume the two code
-   similarity backends produce identical values.
-4. Use all 800 IDs for the standard comparison. Adaptive evaluation excludes
-   the frozen 32 calibration IDs from every method and its baseline (768 remain).
-5. Compare observed memory budgets, not nominal bits versus eviction percentages.
-6. Execute on the RTX 5090 and preserve environment, commands, predictions and manifests.
+## Baseline
 
-The checked-in shared baseline summary at
-`results/longbench/Llama-3.1-8B-Instruct_none_0.0.summary.json` describes a
-260-record run with `max_prompt_tokens=6000` and a 45.24 macro score. It is not
-evidence of a full 800-record run or the reported 47.72 baseline. This contribution
-does not change or reclassify the team's existing results.
+The team's full-cache baseline on all 800 records is 47.72
+(`results/longbench/Llama-3.1-8B-Instruct_none_0.0.summary.json` on the team repo's main).
+An older 260-record summary existed only on a personal fork that was behind main.
 
-## Running the reference package
+## Known gaps
 
-Use an isolated environment in this directory so its Transformers pin does not
-alter the team's kvpress environment:
+- The paper's 2.5- and 3.5-bit settings split out outlier channels and give them more bits.
+  This package uses one bit width per layer, so its 2/3/4-bit results are not those settings.
+- The cache keeps decoded keys and values for attention, so packed storage savings are
+  computed, not measured, as for KVzip and RestoreKV in the harness.
+
+## Running the standalone tools
+
+Use a virtual environment in this directory that reuses the lab image's torch:
 
 ```bash
 cd members/vedant
-python3 -m venv .venv
+python3 -m venv --system-site-packages .venv
 source .venv/bin/activate
 python -m pip install -e '.[dev,hf,plots,score]'
 python -m pytest -q
 ```
 
-The GPU runbook covers the standalone reference studies. Until the integration
-steps above are complete, label their outputs as reference experiments rather
-than shared-harness equal-memory results.
+Label standalone outputs as reference experiments, not shared-harness results.

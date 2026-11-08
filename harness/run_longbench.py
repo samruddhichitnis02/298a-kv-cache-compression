@@ -40,12 +40,19 @@ from triattention_press import TriAttentionPress  # noqa: E402
 sys.path.insert(0, str(REPO / "members" / "anees"))
 from quantized_restorekv_press import QuantizedRestoreKVPress  # noqa: E402
 
+# Vedant's TurboQuant: turboquant_{2,3,4}bit (QJL keys) or turboquant_mse_{3,4}bit (no QJL).
+# It quantizes the whole document, so --compression-ratio is not used.
+sys.path.insert(0, str(REPO / "members" / "vedant"))
+from turboquant_press import TurboQuantPress  # noqa: E402
+
 
 def make_press(name, compression_ratio):
     if name == "none":
         return None
     if name in ("restorekv_4bit", "restorekv_2bit"):
         return QuantizedRestoreKVPress(compression_ratio=compression_ratio, bits=int(name.split("_")[1][0]))
+    if name.startswith("turboquant_"):
+        return TurboQuantPress(bits=int(name[-4]), qjl_keys="_mse_" not in name)
     presses = {
         "snapkv": SnapKVPress,
         "kvzip": KVzipPress,
@@ -63,16 +70,20 @@ def kv_bytes_per_token(config, bytes_per_value=2):
     return 2 * config.num_hidden_layers * config.num_key_value_heads * head_dim * bytes_per_value
 
 
-def kv_cache_gb(pipe, context, question, ratio):
+def kv_cache_gb(pipe, context, question, ratio, press=None):
     """KV cache kept after compression: the compressed context plus the uncompressed question.
 
     Computed rather than measured, because some presses (KVzip, RestoreKV) only
-    mask evicted pairs and leave them in GPU memory.
+    mask evicted pairs and leave them in GPU memory. A quantizing press such as
+    TurboQuant gives its packed bytes per document token instead.
     """
     n_context = len(pipe.tokenizer(context, add_special_tokens=False).input_ids)
     n_question = len(pipe.tokenizer(question, add_special_tokens=False).input_ids)
+    full = kv_bytes_per_token(pipe.model.config)
+    if hasattr(press, "context_bytes_per_token"):
+        return round((n_context * press.context_bytes_per_token(pipe.model.config) + n_question * full) / 1e9, 4)
     kept = round((1 - ratio) * n_context) + n_question
-    return round(kept * kv_bytes_per_token(pipe.model.config) / 1e9, 4)
+    return round(kept * full / 1e9, 4)
 
 
 def pick_device():
@@ -87,7 +98,9 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--model", default="meta-llama/Llama-3.1-8B-Instruct")
     parser.add_argument("--data", default=str(DEFAULT_DATA))
-    parser.add_argument("--press", default="none", help="none, snapkv, kvzip, restorekv, restorekv_4bit or restorekv_2bit")
+    parser.add_argument("--press", default="none",
+                        help="none, snapkv, kvzip, restorekv, restorekv_4bit, restorekv_2bit, "
+                             "turboquant_{2,3,4}bit or turboquant_mse_{3,4}bit")
     parser.add_argument("--compression-ratio", type=float, default=0.0, help="fraction of the KV cache removed")
     parser.add_argument("--tasks", default="", help="comma-separated task names (default: all 16)")
     parser.add_argument("--per-task", type=int, default=None, help="records per task (default: all)")
@@ -156,7 +169,7 @@ def main():
                                                          record["answers"], record["all_classes"]),
                 "oom": oom,
                 "seconds": round(seconds, 2),
-                "kv_cache_gb": kv_cache_gb(pipe, context, question + answer_prefix, ratio),
+                "kv_cache_gb": kv_cache_gb(pipe, context, question + answer_prefix, ratio, press),
                 "peak_gpu_gb": round(torch.cuda.max_memory_allocated() / 1e9, 2) if device == "cuda" else None,
             }
             out.write(json.dumps(row) + "\n")
