@@ -17,6 +17,14 @@ run() {
     python "$@" || echo "!!! failed: $*"
 }
 
+# 0. Ten-minute check that Charvee's ResidualKV runs on the lab image, before her own
+#    lab slot: 2 records per task. Needs only a clone of the authors' code, no installs.
+if [ ! -d ../DeltaKV ]; then
+    git clone -q https://github.com/CURRENTF/DeltaKV ../DeltaKV &&
+        git -C ../DeltaKV checkout -q 11a837b21acfa475957210c5b2d339b89c1b7e3b
+fi
+run members/charvee/run_residualkv.py --compression-ratio 0.9 --per-task 2
+
 # 1. Comparison rows for the LongBench table (SAM-95), main budgets first
 for ratio in 0.9 0.75; do
     run harness/run_longbench.py --press kvzip --compression-ratio "$ratio"
