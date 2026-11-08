@@ -17,6 +17,7 @@ at the repo root (unzip Samruddhi's processed_longbench.zip there).
 
 import argparse
 import json
+import re
 import time
 from pathlib import Path
 
@@ -40,10 +41,20 @@ from triattention_press import TriAttentionPress  # noqa: E402
 sys.path.insert(0, str(REPO / "members" / "anees"))
 from quantized_restorekv_press import QuantizedRestoreKVPress  # noqa: E402
 
-# Vedant's TurboQuant: turboquant_{2,3,4}bit (QJL keys) or turboquant_mse_{3,4}bit (no QJL).
+# Vedant's TurboQuant: turboquant_{2,3,4}bit (QJL keys) or turboquant_mse_{2,3,4}bit (no QJL).
 # It quantizes the whole document, so --compression-ratio is not used.
-sys.path.insert(0, str(REPO / "members" / "vedant"))
-from turboquant_press import TurboQuantPress  # noqa: E402
+TURBOQUANT = re.compile(r"turboquant_(mse_)?([234])bit")
+
+
+def make_turboquant_press(name):
+    match = TURBOQUANT.fullmatch(name)
+    if match is None:
+        raise ValueError(f"unknown TurboQuant press: {name} (use turboquant_[mse_]{{2,3,4}}bit)")
+    # Imported only when asked for, so the other methods' runs never depend on members/vedant.
+    sys.path.insert(0, str(REPO / "members" / "vedant"))
+    from turboquant_press import TurboQuantPress
+
+    return TurboQuantPress(bits=int(match.group(2)), qjl_keys=match.group(1) is None)
 
 
 def make_press(name, compression_ratio):
@@ -52,7 +63,7 @@ def make_press(name, compression_ratio):
     if name in ("restorekv_4bit", "restorekv_2bit"):
         return QuantizedRestoreKVPress(compression_ratio=compression_ratio, bits=int(name.split("_")[1][0]))
     if name.startswith("turboquant_"):
-        return TurboQuantPress(bits=int(name[-4]), qjl_keys="_mse_" not in name)
+        return make_turboquant_press(name)
     presses = {
         "snapkv": SnapKVPress,
         "kvzip": KVzipPress,

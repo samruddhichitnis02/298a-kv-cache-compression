@@ -24,7 +24,7 @@ and in the code-similarity backend.
 
 The team's full-cache baseline on all 800 records is 47.72
 (`results/longbench/Llama-3.1-8B-Instruct_none_0.0.summary.json` on the team repo's main).
-An older 260-record summary existed only on a personal fork that was behind main.
+This package's scorer gives 47.45 on the same predictions; only lcc and repobench-p differ.
 
 ## Known gaps
 

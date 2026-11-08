@@ -31,6 +31,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parent / "src"))
 from turboquant.kv_cache import TurboQuantCacheLayer  # noqa: E402
 
 NORM_BYTES = 2  # fp16
+# Tokens packed at a time. Every vector is quantized on its own, so chunking gives identical
+# results; it only caps the temporary int64 tensors used for bit packing on 32k-token prompts.
+CHUNK_TOKENS = 4096
 
 
 def head_token_bytes(head_dim: int, bits: int, qjl_keys: bool = True) -> float:
@@ -59,8 +62,10 @@ class TurboQuantPress(BasePress):
             keys.shape[-1], self.bits, qjl_keys=self.qjl_keys,
             seed=self.seed + module.layer_idx * 100_003,
         )
-        layer.update(keys, values)
-        if module.layer_idx == 0:
+        for start in range(0, keys.shape[2], CHUNK_TOKENS):
+            end = start + CHUNK_TOKENS
+            layer.update(keys[:, :, start:end], values[:, :, start:end])
+        if module.layer_idx == 0 or not self.stats:  # layer 0 starts a new document
             self.stats = {"bits": self.bits, "qjl_keys": self.qjl_keys, "packed_bytes": 0}
         self.stats["packed_bytes"] += layer.storage_stats().compressed_bytes
         return layer._decoded_keys, layer._decoded_values

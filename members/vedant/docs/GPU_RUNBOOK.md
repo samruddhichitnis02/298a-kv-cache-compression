@@ -1,7 +1,7 @@
 # RTX 5090 runbook
 
-Run from the repository root. This package is locally verified; the lab GPU
-installation and Llama 3.1 8B experiment results remain pending.
+These are the standalone reference studies; run them from `members/vedant`. The team-table
+LongBench runs use the shared harness instead: `scripts/run_harness_longbench.sh` (see README).
 
 ## 1 Install and check the environment
 

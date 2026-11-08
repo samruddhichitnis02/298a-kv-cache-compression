@@ -69,3 +69,18 @@ def test_press_quantizes_like_the_cache_and_counts_bytes() -> None:
     assert press.stats["packed_bytes"] == 2 * 10 * head_token_bytes(16, 3)
     error = (out_keys.float() - keys.float()).norm() / keys.float().norm()
     assert 0 < error < 0.6
+
+
+def test_chunked_document_matches_one_pass(monkeypatch) -> None:
+    import turboquant_press
+
+    keys = torch.randn(1, 2, 37, 16, dtype=torch.bfloat16)
+    values = torch.randn(1, 2, 37, 16, dtype=torch.bfloat16)
+    module = SimpleNamespace(layer_idx=3)
+    whole = TurboQuantPress(bits=3).compress(module, None, keys, values, None, {})
+    monkeypatch.setattr(turboquant_press, "CHUNK_TOKENS", 8)
+    press = TurboQuantPress(bits=3)
+    chunked = press.compress(SimpleNamespace(layer_idx=0), None, keys, values, None, {})
+    chunked = press.compress(module, None, keys, values, None, {})
+    assert torch.equal(whole[0], chunked[0]) and torch.equal(whole[1], chunked[1])
+    assert press.stats["packed_bytes"] == 2 * 2 * 37 * head_token_bytes(16, 3)

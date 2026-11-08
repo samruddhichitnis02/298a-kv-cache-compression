@@ -24,6 +24,10 @@ bash members/vedant/scripts/run_harness_longbench.sh 2>&1 | tee -a turboquant.lo
 
 `kv_cache_gb` counts the packed document cache (codes plus fp16 norms) and the bf16
 question. Nothing to install in the lab: kvpress and transformers 5.2.0 are in the image.
+Before running: unzip the team's `processed_longbench.zip` so that
+`data/processed_longbench/processed_longbench_dev.jsonl` exists at the repo root, and log in
+with a Hugging Face account that has access to `meta-llama/Llama-3.1-8B-Instruct`. The script
+checks the data file, runs 2 records per task first, and stops if that check fails.
 
 The standalone tools below (G3 gate, real-KV checks, adaptive allocation, context
 scaling) still run from this folder. See [TEAM_INTEGRATION.md](TEAM_INTEGRATION.md).
