@@ -13,17 +13,16 @@ python -m build --no-isolation
  git diff --check
 ```
 
-Use the prepared Git repository or copy this source into the team repository.
-No GitHub remote is selected automatically because the destination repository
-has not been specified. Configure the correct repository and push after review:
+This package lives in the team repository under `members/vedant/`. Work on a branch
+and open a pull request on `samruddhichitnis02/298a-kv-cache-compression`; never push
+to `main` directly:
 
 ```bash
-git add README.md STATUS.md THIRD_PARTY_NOTICES.md MANIFEST.in .gitignore pyproject.toml
-git add src scripts tests docs configs results/g3
+git switch -c vedant/<topic>
+git add members/vedant
 git diff --cached --stat
-git commit -m "Prepare reproducible TurboQuant source and team evaluation pipeline"
-git remote add origin YOUR_GITHUB_REPOSITORY_URL
-git push -u origin main
+git commit -m "<what changed>"
+git push -u origin vedant/<topic>
 ```
 
 Do not add the old transfer ZIP, `.venv`, credentials, model weights or dataset

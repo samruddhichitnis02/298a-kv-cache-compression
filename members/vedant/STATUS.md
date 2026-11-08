@@ -86,8 +86,9 @@ The exact commands and handoff format are documented in
 - Packed KV payload, quantizer-state overhead and CUDA peak memory are distinct fields.
 - Added Conda-free lab setup with actual CUDA kernel preflight and GitHub source-release instructions.
 - Built both Python source distribution and wheel locally.
-- The team's reported 47.72 baseline is not yet independently reproduced by this package.
-- Shared Drive runner access was unavailable; newer shared harness settings still need cross-checking.
+- The team's 800-record baseline (47.72, shared harness scorer) is on the team repo's main;
+  this package's scorer gives 47.45 on the same predictions (lcc and repobench-p differ).
+- TurboQuant also runs in the shared harness (`turboquant_*` presses); use those runs for the team table.
 
 ## Shared repository review
 

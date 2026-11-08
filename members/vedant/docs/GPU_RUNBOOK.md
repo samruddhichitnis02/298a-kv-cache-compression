@@ -92,11 +92,11 @@ repeating for 8192, 16384 and 32000, followed by `--output-dir results/context_r
 
 ## 7 Other methods and memory budgets
 
-Other method owners should preserve `record_id`, `task`, `prediction`, `answers`,
-`all_classes`, model/revision, seed, dtype, prompt/token-ID hashes and their
-storage definition. Use this package's scorer for all methods. Do not substitute
-an aggregate 47.72 without the underlying compatible predictions and setup.
-Compare additional scored runs with `turboquant-compare --run full=... --run
+The team table uses the shared harness and its scorer (`harness/longbench.py`, 0–1);
+the 800-record full-cache baseline (47.72) is on the team repo's main in `results/longbench/`.
+This package's 0–100 scorer gives 47.45 on the same predictions (only lcc and repobench-p
+differ, from fuzzywuzzy vs rapidfuzz), so never mix the two in one table.
+For standalone reference studies, compare additional scored runs with `turboquant-compare --run full=... --run
 kivi_2bit=... --evaluation-set team --dataset "$DATA" --output-dir ...`.
 Use `--evaluation-set adaptive` for the held-out 768 comparison.
 
