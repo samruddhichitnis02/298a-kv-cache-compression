@@ -23,7 +23,8 @@ bash members/vedant/scripts/run_harness_longbench.sh 2>&1 | tee -a turboquant.lo
 | `turboquant_mse_4bit` | 4-bit MSE | 4-bit MSE | 25.8% |
 
 `kv_cache_gb` counts the packed document cache (codes plus fp16 norms) and the bf16
-question. Nothing to install in the lab: kvpress and transformers 5.2.0 are in the image.
+question. In the lab container, install the team's packages once (the same as for the other methods):
+`pip install kvpress==0.5.5 transformers==5.2.0 peft==0.21.2 datasets==5.1.0 rouge rapidfuzz`.
 Before running: unzip the team's `processed_longbench.zip` so that
 `data/processed_longbench/processed_longbench_dev.jsonl` exists at the repo root, and log in
 with a Hugging Face account that has access to `meta-llama/Llama-3.1-8B-Instruct`. The script

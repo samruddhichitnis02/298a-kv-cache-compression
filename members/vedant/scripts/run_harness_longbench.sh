@@ -6,7 +6,8 @@
 #   hf auth login          # the account needs access to meta-llama/Llama-3.1-8B-Instruct
 #   bash members/vedant/scripts/run_harness_longbench.sh 2>&1 | tee -a turboquant.log
 #
-# Nothing to install: the lab image already has kvpress 0.5.5 and transformers 5.2.0.
+# Inside the lab container, install the team's packages once first:
+#   pip install kvpress==0.5.5 transformers==5.2.0 peft==0.21.2 datasets==5.1.0 rouge rapidfuzz
 # The dev set is not in git: unzip the team's processed_longbench.zip so that
 # data/processed_longbench/processed_longbench_dev.jsonl exists at the repo root.
 # Each run saves after every record and skips saved records, so if the machine stops,
