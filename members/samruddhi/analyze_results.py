@@ -27,9 +27,9 @@ import os
 
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parents[1]
-# Both the naive baseline (press="none") and the TriAttention runs are written by the
-# harness into results/longbench. KEEP_PRESSES filters to just those two.
-LB_DIRS = [REPO / "results" / "longbench"]
+# Baseline (press="none") lives in the shared results/longbench; TriAttention results are
+# kept under results/triattention/longbench. KEEP_PRESSES filters to just these two presses.
+LB_DIRS = [REPO / "results" / "longbench", REPO / "results" / "triattention" / "longbench"]
 OUT = Path(os.environ.get("SAM_OUT_DIR", str(HERE / "results_out")))
 FIG = OUT / "figures"
 # RESULTS.md / FLAWS.md live in the member folder.
