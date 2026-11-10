@@ -163,10 +163,9 @@ class TriAttentionPress(ScorerPress):
     window_size: int = 64
     n_sink: int = 4
     stats_path: str = str(DEFAULT_STATS)
-    # The trig series over future-query distances decays quickly; a small geometric grid
-    # (1,2,...,1024) captures it while keeping the [n_keys, n_offsets, n_freqs] score tensor
-    # ~16x smaller than the paper's 65536 default -- important for memory during chunked prefill.
-    offset_max_length: int = 1024
+    # Geometric offset grid for the trig series (paper default). The chunked scorer keeps memory
+    # bounded regardless, so we use the faithful value rather than a memory-driven shrink.
+    offset_max_length: int = 65536
     score_aggregation: str = "mean"
     # Key-chunk size for the memory-bounded scorer (never builds a full-sequence score tensor).
     score_chunk: int = 1024
