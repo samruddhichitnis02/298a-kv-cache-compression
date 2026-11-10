@@ -30,6 +30,38 @@ how aggressively it drops:
 | 0.90 | 10% | 90% |
 | 0.95 | 5% | 95% |
 
+## How we actually ran it
+
+The experiment had three stages, run once each.
+
+**Stage 1: Calibration (one time).** Before TriAttention can score anything, it needs to learn how
+Llama-3.1-8B's attention behaves. We ran the authors' calibration once: feed the model a sample of
+text, record the per-head frequency statistics (the "centers" and "norms" the method uses to judge
+importance), and save them to a file (`calibration/llama31_8b_stats.pt`). This file is reused for every
+run. It is computed with the authors' exact procedure, so the scoring matches the paper.
+
+**Stage 2: Build the data (one time).** We prepared the 800 LongBench documents into a single file,
+tokenized for Llama-3.1-8B, using the official LongBench prompts (`build_dev_data.py`).
+
+**Stage 3: Run each compression ratio (four times).** For every ratio (0.75, 0.80, 0.90, 0.95) we ran
+the full set of 800 documents, one document at a time. For each document the process is:
+
+1. The model reads the whole document and builds the full KV cache.
+2. TriAttention scores every stored word using the calibrated statistics (how likely each word is to
+   matter), and always protects the first few "anchor" words and the most recent words.
+3. It keeps only the top words allowed by the ratio (top 25%, 20%, 10% or 5%) and drops the rest. The
+   kept words stay in full bf16 precision; nothing is quantized.
+4. The model answers the question using only the shrunken cache.
+5. We score the answer with LongBench's official metric for that task and record the score, the cache
+   size, the time, and the peak GPU memory.
+
+The only thing that changed between the four runs was the ratio, so the four results are directly
+comparable. We used normal single-shot reading (the same as the full-cache baseline and RestoreKV), so
+the comparison is fair. All four ratios completed all 800 documents with zero crashes.
+
+`run_all.py` drives all of this: it runs the four ratios back to back, then builds the tables and
+charts.
+
 ## The numbers
 
 All 800 documents, all four ratios, measured against the full uncompressed cache.
