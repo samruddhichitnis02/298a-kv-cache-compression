@@ -60,6 +60,10 @@ Memory saved versus accuracy kept, side by side:
 
 ![Memory saved vs accuracy kept](results_out/figures/tradeoff.png)
 
+Macro average score for each run:
+
+![Macro average per run](results_out/figures/macro_average.png)
+
 ---
 
 ## 🎯 Where it shines, where it struggles
