@@ -11,6 +11,8 @@ Inputs:  raw LongBench JSONL files (--raw), data/processed_longbench/processed_l
          and members/*/results/**/*.jsonl run file.
 Outputs: data/warehouse/team6.db and data/warehouse/monitoring_report.md (both outside Git).
 
+Demo:    add --demo-bad-input to inject three invalid records (a record missing from the raw archive,
+         a 40,000-token prompt and a record in two splits) and show the checks rejecting them.
 Tables:  raw_records, clean_records, splits, runs, pipeline_log. Full document text is not
 copied into the warehouse; each document is identified by the SHA-256 of its context.
 """
@@ -51,9 +53,11 @@ def sha(text):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--raw", required=True, help="folder with the raw LongBench task JSONL files")
+    ap.add_argument("--demo-bad-input", action="store_true",
+                    help="demo: inject three invalid records and show that the checks reject them (writes a separate db)")
     args = ap.parse_args()
     OUT_DIR.mkdir(parents=True, exist_ok=True)
-    db_path = OUT_DIR / "team6.db"
+    db_path = OUT_DIR / ("team6_bad_input_demo.db" if args.demo_bad_input else "team6.db")
     db_path.unlink(missing_ok=True)
     db = sqlite3.connect(db_path)
     db.executescript(SCHEMA)
@@ -80,6 +84,12 @@ def main():
         r = json.loads(line)
         clean_rows.append((r["record_id"], r["task"], r["category"], r["metric"], r["context_words"],
                            r["prompt_tokens_before"], r["prompt_tokens_after"], int(bool(r["truncated"])), sha(r["context"])))
+    if args.demo_bad_input:
+        # 1) a record that never existed in the raw archive, 2) a prompt over the 32,000-token cap
+        clean_rows.append(("demo_not_in_raw", "qasper", "Single-Doc QA", "F1", 10, 100, 100, 0, "x"))
+        r0 = clean_rows[0]
+        clean_rows[0] = r0[:5] + (40000, 40000, 0) + r0[8:]
+        print("demo: injected a record missing from the raw archive and a 40,000-token prompt")
     db.executemany("INSERT INTO clean_records VALUES (?,?,?,?,?,?,?,?,?)", clean_rows)
     check("cleaning", "clean record count", EXPECTED["clean"], len(clean_rows))
     check("cleaning", "rows removed by cleaning", 19, len(raw_rows) - len(clean_rows))
@@ -95,14 +105,30 @@ def main():
     split_rows = [(i, "validation") for i in dev_ids]
     split_rows += [(i, "test") for i in json.load(open(SPLITS / "test_ids.json"))["test_ids"]]
     split_rows += [(i, "train") for i in json.load(open(SPLITS / "train_ids.json"))["train_ids"]]
-    db.executemany("INSERT INTO splits VALUES (?,?)", split_rows)  # PRIMARY KEY rejects any ID in two splits
+    if args.demo_bad_input:
+        split_rows.append((split_rows[0][0], "test"))  # 3) the same record in validation and test
+        print("demo: injected a validation record into the test split")
+    try:
+        db.executemany("INSERT INTO splits VALUES (?,?)", split_rows)  # PRIMARY KEY rejects any ID in two splits
+        check("preparation", "record IDs in more than one split", 0, 0)
+    except sqlite3.IntegrityError as err:
+        check("preparation", "record IDs in more than one split", 0, f"rejected: {err}")
+        db.executemany("INSERT OR IGNORE INTO splits VALUES (?,?)", split_rows)
     for name in ("train", "validation", "test"):
         check("preparation", f"{name} rows", EXPECTED[name],
               db.execute("SELECT COUNT(*) FROM splits WHERE split=?", (name,)).fetchone()[0])
     check("preparation", "split IDs missing from clean data", 0,
           db.execute("SELECT COUNT(*) FROM splits WHERE record_id NOT IN (SELECT record_id FROM clean_records)").fetchone()[0])
-    check("preparation", "records per task in validation", "50 x 16", "50 x 16" if all(n == 50 for (n,) in db.execute(
-        "SELECT COUNT(*) FROM splits s JOIN clean_records c USING(record_id) WHERE split='validation' GROUP BY task")) else "unbalanced")
+    for name in ("validation", "test"):
+        counts = [n for (n,) in db.execute("SELECT COUNT(*) FROM splits s JOIN clean_records c USING(record_id) "
+                                            "WHERE split=? GROUP BY task", (name,))]
+        check("preparation", f"records per task in {name}", "50 x 16",
+              "50 x 16" if len(counts) == 16 and all(n == 50 for n in counts) else f"{counts}")
+    shared_docs = db.execute("SELECT COUNT(*) FROM splits t JOIN clean_records ct USING(record_id) WHERE t.split='test' "
+                             "AND ct.context_sha IN (SELECT c.context_sha FROM splits v JOIN clean_records c USING(record_id) "
+                             "WHERE v.split='validation')").fetchone()[0]
+    check("preparation", "test records sharing a document with validation (disclosed list)",
+          len(json.load(open(SPLITS / "test_ids.json"))["shares_dev_document"]), shared_docs)
 
     # 4. Results: every stored run
     files = sorted(set(glob.glob(str(REPO / "results" / "**" / "*.jsonl"), recursive=True)
@@ -139,8 +165,9 @@ def main():
     lines += ["", f"## Checks: {len(log) - len(fails)} passed, {len(fails)} failed", "",
               "| Stage | Check | Expected | Observed | Status |", "|---|---|---|---|---|"]
     lines += [f"| {s} | {c} | {e} | {o} | {st} |" for (_, s, c, e, o, st) in log]
-    (OUT_DIR / "monitoring_report.md").write_text("\n".join(lines) + "\n")
-    print(f"warehouse: {db_path}\nreport:    {OUT_DIR / 'monitoring_report.md'}\nchecks:    {len(log) - len(fails)} passed, {len(fails)} failed")
+    report = OUT_DIR / ("monitoring_report_bad_input_demo.md" if args.demo_bad_input else "monitoring_report.md")
+    report.write_text("\n".join(lines) + "\n")
+    print(f"warehouse: {db_path}\nreport:    {report}\nchecks:    {len(log) - len(fails)} passed, {len(fails)} failed")
     for f_ in fails:
         print("  FAIL", f_[1], f_[2], "expected", f_[3], "observed", f_[4])
 
