@@ -1,0 +1,53 @@
+{
+  "args": {
+    "model": "meta-llama/Llama-3.1-8B-Instruct",
+    "compressor": "JitaiHao/Llama-3.1-8B-Instruct-Compressor",
+    "deltakv_repo": "/app/298a-kv-cache-compression/members/charvee/DeltaKV",
+    "data": "/app/298a-kv-cache-compression/data/processed_longbench/processed_longbench_dev.jsonl",
+    "compression_ratio": 0.95,
+    "tasks": "",
+    "per_task": null
+  },
+  "config": {
+    "sparse_method": "delta_compressed_quant_kivi_full_fp8_ref",
+    "hf_prefill_chunk_size": 2048000,
+    "full_attention_layers": "0,1,2,8,18",
+    "sink_keep_tokens": 8,
+    "recent_keep_tokens": 128,
+    "deltakv_latent_dim": 512,
+    "deltakv_center_ratio": 0.1,
+    "stride_alpha": 0.001,
+    "deltakv_neighbor_count": 4,
+    "deltakv_latent_quant_bits": 4,
+    "full_layer_kv_quant_bits": 4,
+    "full_layer_kivi_group_size": 32,
+    "full_layer_kivi_residual_length": 32,
+    "cluster_metric": "l2",
+    "use_cluster": true,
+    "use_compression": true,
+    "chunk_prefill_accel_omnikv": false,
+    "pool_kernel_size": 1,
+    "decode_keep_tokens": 0.050000000000000044,
+    "prefill_keep_tokens": 0.050000000000000044
+  },
+  "n_records": 800,
+  "scores": {
+    "narrativeqa": 34.79,
+    "qasper": 43.8,
+    "multifieldqa_en": 55.12,
+    "hotpotqa": 53.76,
+    "2wikimqa": 44.84,
+    "musique": 27.68,
+    "gov_report": 30.3,
+    "qmsum": 25.37,
+    "multi_news": 25.18,
+    "trec": 70.0,
+    "triviaqa": 94.4,
+    "samsum": 46.41,
+    "passage_count": 4.0,
+    "passage_retrieval_en": 98.0,
+    "lcc": 55.62,
+    "repobench-p": 48.82,
+    "average": 47.38
+  }
+}
