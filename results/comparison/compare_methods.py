@@ -95,7 +95,7 @@ def main():
     runs, skipped = [], []
     for f in files:
         name = Path(f).stem
-        if f == str(BASELINE) or "ruler" in f or "smoke" in f:
+        if f == str(BASELINE) or "ruler" in f or "smoke" in f or "followup" in f:
             continue
         rows = load(f)
         if set(rows) != set(base) or "score" not in next(iter(rows.values())):
@@ -142,8 +142,7 @@ def main():
                   + " | ".join(f"{r['categories'][c]:.1f}" for c in CATEGORIES) + " |")
     md += ["", "## Not included yet", "",
            "Runs are added automatically when their 800-record files are committed. Missing at the time of writing: "
-           "ResidualKV (all budgets), RDKV (result files not yet committed), KVzip and SnapKV at ratios 0.95 and 0.8, "
-           "RestoreKV 2-bit and 10% quantized runs.", ""]
+           "ResidualKV (all budgets) and RDKV (result files not yet committed).", ""]
     if skipped:
         md += ["Files skipped because their record IDs do not match the 800-record baseline: "
                + ", ".join(f"{n} ({k} rows)" for n, k in skipped), ""]

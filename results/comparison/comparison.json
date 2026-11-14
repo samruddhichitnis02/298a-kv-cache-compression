@@ -35,6 +35,28 @@
    "source": "results/restorekv/longbench/Llama-3.1-8B-Instruct_restorekv_4bit_0.95.jsonl"
   },
   {
+   "run": "Llama-3.1-8B-Instruct_restorekv_2bit_0.95",
+   "family": "RestoreKV",
+   "setting": "2-bit, ratio 0.95",
+   "score": 45.00673827753092,
+   "delta": -2.7089101906788358,
+   "ci": [
+    -4.4389963228569735,
+    -1.0579443432556008
+   ],
+   "memory_pct": 6.438412526051125,
+   "oom": 0,
+   "categories": {
+    "Single-doc QA": 39.906995223389565,
+    "Multi-doc QA": 34.496921596921595,
+    "Summarization": 28.484213558209152,
+    "Few-shot": 67.05513294747168,
+    "Synthetic": 50.25,
+    "Code": 54.88901123125936
+   },
+   "source": "results/restorekv/longbench/Llama-3.1-8B-Instruct_restorekv_2bit_0.95.jsonl"
+  },
+  {
    "run": "Llama-3.1-8B-Instruct_restorekv_0.95",
    "family": "RestoreKV",
    "setting": "ratio 0.95",
@@ -77,6 +99,94 @@
     "Code": 47.59363951041085
    },
    "source": "results/triattention/longbench/Llama-3.1-8B-Instruct_triattention_0.95.jsonl"
+  },
+  {
+   "run": "Llama-3.1-8B-Instruct_kvzip_0.95",
+   "family": "KVzip",
+   "setting": "ratio 0.95",
+   "score": 28.316534355002425,
+   "delta": -19.399114113207332,
+   "ci": [
+    -21.697334666312535,
+    -17.09730761078728
+   ],
+   "memory_pct": 6.438412526051125,
+   "oom": 0,
+   "categories": {
+    "Single-doc QA": 28.94659379942461,
+    "Multi-doc QA": 24.892580811001864,
+    "Summarization": 16.08913100587027,
+    "Few-shot": 47.90070523898809,
+    "Synthetic": 7.0,
+    "Code": 42.78875855709212
+   },
+   "source": "results/restorekv/longbench/Llama-3.1-8B-Instruct_kvzip_0.95.jsonl"
+  },
+  {
+   "run": "Llama-3.1-8B-Instruct_snapkv_0.95",
+   "family": "SnapKV",
+   "setting": "ratio 0.95",
+   "score": 27.23544534980451,
+   "delta": -20.480203118405246,
+   "ci": [
+    -22.6911232905567,
+    -18.20644290309239
+   ],
+   "memory_pct": 6.438412526051125,
+   "oom": 0,
+   "categories": {
+    "Single-doc QA": 17.39448628884078,
+    "Multi-doc QA": 17.03678110450893,
+    "Summarization": 18.250127262161733,
+    "Few-shot": 56.456426761654065,
+    "Synthetic": 6.0,
+    "Code": 48.176830672687814
+   },
+   "source": "results/restorekv/longbench/Llama-3.1-8B-Instruct_snapkv_0.95.jsonl"
+  },
+  {
+   "run": "Llama-3.1-8B-Instruct_restorekv_4bit_0.9",
+   "family": "RestoreKV",
+   "setting": "4-bit, ratio 0.9",
+   "score": 47.338349076566814,
+   "delta": -0.3772993916429428,
+   "ci": [
+    -1.7831270063287428,
+    0.95802937033802
+   ],
+   "memory_pct": 11.362084296245762,
+   "oom": 0,
+   "categories": {
+    "Single-doc QA": 43.34421722573929,
+    "Multi-doc QA": 40.61405567057741,
+    "Summarization": 28.976837181226532,
+    "Few-shot": 69.89227725624032,
+    "Synthetic": 50.0625,
+    "Code": 54.40321161185915
+   },
+   "source": "results/restorekv/longbench/Llama-3.1-8B-Instruct_restorekv_4bit_0.9.jsonl"
+  },
+  {
+   "run": "Llama-3.1-8B-Instruct_restorekv_2bit_0.9",
+   "family": "RestoreKV",
+   "setting": "2-bit, ratio 0.9",
+   "score": 44.69589969839258,
+   "delta": -3.019748769817177,
+   "ci": [
+    -4.723080229599569,
+    -1.3669236189972989
+   ],
+   "memory_pct": 11.362084296245762,
+   "oom": 0,
+   "categories": {
+    "Single-doc QA": 39.145680979004894,
+    "Multi-doc QA": 35.497904056727585,
+    "Summarization": 27.936609212458592,
+    "Few-shot": 67.93726365716049,
+    "Synthetic": 48.59090909090909,
+    "Code": 53.20010163820422
+   },
+   "source": "results/restorekv/longbench/Llama-3.1-8B-Instruct_restorekv_2bit_0.9.jsonl"
   },
   {
    "run": "Llama-3.1-8B-Instruct_restorekv_0.9",
@@ -319,6 +429,50 @@
     "Code": 55.12228605488892
    },
    "source": "results/restorekv/longbench/Llama-3.1-8B-Instruct_restorekv_0.8.jsonl"
+  },
+  {
+   "run": "Llama-3.1-8B-Instruct_kvzip_0.8",
+   "family": "KVzip",
+   "setting": "ratio 0.8",
+   "score": 45.997260484134294,
+   "delta": -1.7183879840754628,
+   "ci": [
+    -3.5309265441069533,
+    -0.06568901000361194
+   ],
+   "memory_pct": 21.211002506948812,
+   "oom": 0,
+   "categories": {
+    "Single-doc QA": 43.59382431630527,
+    "Multi-doc QA": 39.941366041366045,
+    "Summarization": 28.678803217274282,
+    "Few-shot": 66.45921175927397,
+    "Synthetic": 45.7625,
+    "Code": 54.20577587174503
+   },
+   "source": "results/restorekv/longbench/Llama-3.1-8B-Instruct_kvzip_0.8.jsonl"
+  },
+  {
+   "run": "Llama-3.1-8B-Instruct_snapkv_0.8",
+   "family": "SnapKV",
+   "setting": "ratio 0.8",
+   "score": 38.42406234936724,
+   "delta": -9.291586118842517,
+   "ci": [
+    -11.290253010744767,
+    -7.222640161215817
+   ],
+   "memory_pct": 21.211002506948812,
+   "oom": 0,
+   "categories": {
+    "Single-doc QA": 28.31521926878275,
+    "Multi-doc QA": 32.03179337002866,
+    "Summarization": 23.444395716040685,
+    "Few-shot": 65.54985872762761,
+    "Synthetic": 31.145833333333332,
+    "Code": 52.234764837885024
+   },
+   "source": "results/restorekv/longbench/Llama-3.1-8B-Instruct_snapkv_0.8.jsonl"
   },
   {
    "run": "Llama-3.1-8B-Instruct_triattention_0.8",

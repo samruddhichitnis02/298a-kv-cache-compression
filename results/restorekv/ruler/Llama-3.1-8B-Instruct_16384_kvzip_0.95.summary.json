@@ -1,0 +1,27 @@
+{
+  "args": {
+    "model": "meta-llama/Llama-3.1-8B-Instruct",
+    "length": "16384",
+    "press": "kvzip",
+    "compression_ratio": 0.95,
+    "per_task": 25
+  },
+  "device": "cuda",
+  "n_examples": 325,
+  "scores": {
+    "cwe": 1.6,
+    "fwe": 45.33,
+    "niah_multikey_1": 72.0,
+    "niah_multikey_2": 68.0,
+    "niah_multikey_3": 4.0,
+    "niah_multiquery": 66.0,
+    "niah_multivalue": 42.0,
+    "niah_single_1": 100.0,
+    "niah_single_2": 92.0,
+    "niah_single_3": 88.0,
+    "qa_1": 28.0,
+    "qa_2": 32.0,
+    "vt": 96.8,
+    "average": 56.59
+  }
+}
