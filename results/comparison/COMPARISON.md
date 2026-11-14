@@ -9,13 +9,18 @@ Memory = mean computed KV-cache size as a share of the full cache (document + un
 | Method | Setting | Memory | Score | Δ vs full [95% CI] | OOM |
 |---|---|---|---|---|---|
 | RestoreKV | 4-bit, ratio 0.95 | 6.4% | 46.63 | -1.09 [-2.92, +0.74] | 0 |
+| RestoreKV | 2-bit, ratio 0.95 | 6.4% | 45.01 | -2.71 [-4.44, -1.06] | 0 |
 | RestoreKV | ratio 0.95 | 6.4% | 36.13 | -11.58 [-13.90, -9.14] | 0 |
 | TriAttention | ratio 0.95 | 6.4% | 31.41 | -16.31 [-18.62, -14.05] | 0 |
+| KVzip | ratio 0.95 | 6.4% | 28.32 | -19.40 [-21.70, -17.10] | 0 |
+| SnapKV | ratio 0.95 | 6.4% | 27.24 | -20.48 [-22.69, -18.21] | 0 |
 
 ## About 11%
 
 | Method | Setting | Memory | Score | Δ vs full [95% CI] | OOM |
 |---|---|---|---|---|---|
+| RestoreKV | 4-bit, ratio 0.9 | 11.4% | 47.34 | -0.38 [-1.78, +0.96] | 0 |
+| RestoreKV | 2-bit, ratio 0.9 | 11.4% | 44.70 | -3.02 [-4.72, -1.37] | 0 |
 | RestoreKV | ratio 0.9 | 11.4% | 43.29 | -4.42 [-6.43, -2.38] | 0 |
 | KVzip | ratio 0.9 | 11.4% | 41.61 | -6.11 [-8.19, -4.01] | 0 |
 | TriAttention | ratio 0.9 | 11.4% | 33.10 | -14.62 [-17.01, -12.31] | 0 |
@@ -34,9 +39,11 @@ Memory = mean computed KV-cache size as a share of the full cache (document + un
 | TurboQuant | MSE 3-bit | 20.8% | 47.90 | +0.18 [-0.85, +1.25] | 0 |
 | RestoreKV | ratio 0.8 | 21.2% | 47.63 | -0.09 [-1.80, +1.56] | 0 |
 | TurboQuant | MSE 2.5-bit | 18.5% | 46.44 | -1.28 [-2.71, +0.12] | 0 |
+| KVzip | ratio 0.8 | 21.2% | 46.00 | -1.72 [-3.53, -0.07] | 0 |
 | TurboQuant | adaptive | 21.2% | 44.57 | -3.14 [-4.88, -1.44] | 0 |
 | TurboQuant | QJL 3-bit | 21.2% | 44.48 | -3.24 [-4.90, -1.61] | 0 |
 | TurboQuant | QJL 2.5-bit | 19.3% | 39.89 | -7.83 [-9.91, -5.79] | 0 |
+| SnapKV | ratio 0.8 | 21.2% | 38.42 | -9.29 [-11.29, -7.22] | 0 |
 | TriAttention | ratio 0.8 | 21.2% | 37.79 | -9.92 [-11.96, -7.93] | 0 |
 
 ## About 24-28%
@@ -58,8 +65,13 @@ Memory = mean computed KV-cache size as a share of the full cache (document + un
 |---|---|---|---|---|---|---|---|---|
 | Full cache | — | 100% | 44.0 | 41.6 | 28.7 | 70.8 | 52.2 | 51.9 |
 | RestoreKV | 4-bit, ratio 0.95 | 6.4% | 47.5 | 40.0 | 29.2 | 67.3 | 44.5 | 52.7 |
+| RestoreKV | 2-bit, ratio 0.95 | 6.4% | 39.9 | 34.5 | 28.5 | 67.1 | 50.2 | 54.9 |
 | RestoreKV | ratio 0.95 | 6.4% | 37.2 | 31.7 | 25.9 | 60.2 | 9.0 | 47.4 |
 | TriAttention | ratio 0.95 | 6.4% | 18.1 | 25.0 | 21.4 | 57.5 | 20.7 | 47.6 |
+| KVzip | ratio 0.95 | 6.4% | 28.9 | 24.9 | 16.1 | 47.9 | 7.0 | 42.8 |
+| SnapKV | ratio 0.95 | 6.4% | 17.4 | 17.0 | 18.3 | 56.5 | 6.0 | 48.2 |
+| RestoreKV | 4-bit, ratio 0.9 | 11.4% | 43.3 | 40.6 | 29.0 | 69.9 | 50.1 | 54.4 |
+| RestoreKV | 2-bit, ratio 0.9 | 11.4% | 39.1 | 35.5 | 27.9 | 67.9 | 48.6 | 53.2 |
 | RestoreKV | ratio 0.9 | 11.4% | 44.3 | 36.8 | 28.3 | 66.8 | 30.0 | 52.0 |
 | KVzip | ratio 0.9 | 11.4% | 39.9 | 39.4 | 27.2 | 61.9 | 28.5 | 51.8 |
 | TriAttention | ratio 0.9 | 11.4% | 19.6 | 24.7 | 22.7 | 59.5 | 29.1 | 45.9 |
@@ -71,6 +83,8 @@ Memory = mean computed KV-cache size as a share of the full cache (document + un
 | TurboQuant | adaptive | 21.2% | 38.1 | 39.7 | 28.7 | 68.4 | 47.7 | 46.5 |
 | TurboQuant | QJL 3-bit | 21.2% | 38.6 | 39.5 | 28.5 | 68.0 | 47.8 | 45.9 |
 | RestoreKV | ratio 0.8 | 21.2% | 46.6 | 40.6 | 29.1 | 68.3 | 49.0 | 55.1 |
+| KVzip | ratio 0.8 | 21.2% | 43.6 | 39.9 | 28.7 | 66.5 | 45.8 | 54.2 |
+| SnapKV | ratio 0.8 | 21.2% | 28.3 | 32.0 | 23.4 | 65.5 | 31.1 | 52.2 |
 | TriAttention | ratio 0.8 | 21.2% | 25.5 | 27.1 | 24.7 | 61.1 | 44.8 | 50.0 |
 | TurboQuant | MSE 3.5-bit | 24.7% | 45.0 | 42.0 | 28.7 | 70.0 | 51.2 | 52.8 |
 | TurboQuant | QJL 3.5-bit | 25.5% | 42.4 | 42.7 | 28.0 | 69.0 | 51.4 | 53.4 |
@@ -83,4 +97,4 @@ Memory = mean computed KV-cache size as a share of the full cache (document + un
 
 ## Not included yet
 
-Runs are added automatically when their 800-record files are committed. Missing at the time of writing: ResidualKV (all budgets), RDKV (result files not yet committed), KVzip and SnapKV at ratios 0.95 and 0.8, RestoreKV 2-bit and 10% quantized runs.
+Runs are added automatically when their 800-record files are committed. Missing at the time of writing: ResidualKV (all budgets) and RDKV (result files not yet committed).
