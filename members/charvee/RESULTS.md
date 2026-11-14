@@ -12,14 +12,14 @@ Raw files: `results/residualkv/longbench/`
 
 ## Overall quality vs baseline
 
-| ratio | approx keep | n | average | Δ vs 47.72 | mean seconds / record | wall time (sum) |
+| ratio | approx keep | n | average | Δ vs 47.72 [95% CI] | mean seconds / record | wall time (sum) |
 |------:|------------:|--:|--------:|-----------:|----------------------:|----------------:|
-| 0.75 | 25% | 800 | **47.83** | **+0.11** | 3.52 s | ~47 min |
-| 0.80 | 20% | 800 | **47.85** | **+0.13** | 3.43 s | ~46 min |
-| 0.90 | 10% | 800 | **47.59** | **−0.13** | 3.51 s | ~47 min |
-| 0.95 | 5% | 800 | **47.38** | **−0.34** | 3.26 s | ~43 min |
+| 0.75 | 25% | 800 | **47.83** | **+0.12** [−0.80, +1.09] | 3.52 s | ~47 min |
+| 0.80 | 20% | 800 | **47.85** | **+0.13** [−0.81, +1.14] | 3.43 s | ~46 min |
+| 0.90 | 10% | 800 | **47.59** | **−0.13** [−1.06, +0.84] | 3.51 s | ~47 min |
+| 0.95 | 5% | 800 | **47.38** | **−0.33** [−1.31, +0.66] | 3.26 s | ~43 min |
 
-Quality stays within about **0.3 points** of the full-cache baseline at every budget. Mild gains at 0.75 / 0.80 are within normal run-to-run noise on this harness.
+Quality stays within about **0.3 points** of the full-cache baseline at every budget, and every 95% interval contains 0 (paired bootstrap over records within each task, 2,000 draws; same method as `results/comparison/`). The small gains at 0.75 and 0.80 are noise.
 
 ## Memory (what actually matters for the project)
 
@@ -33,6 +33,8 @@ ResidualKV does **not** shrink the cache to `1 − ratio`. It keeps layers **0, 
 | 0.95 | 0.4015 | 0.3753 | 1.3605 | ~29.5% |
 
 Across these ratios, ResidualKV holds about **0.40 GB** of KV state on average versus **1.36 GB** for a bf16 full cache on the same prompts (~**3.4×** smaller). The ratio knob mainly trades quality, not the logged byte size, because full layers + residuals dominate.
+
+The measured 0.40 GB includes the 5 full layers and the FP8 references, which the authors' code rounds but keeps in bf16. Counted packed, as in the paper's storage formula, the same cache is about **14%** of the full cache (paper: 13.4%). See [docs/CHARVEE_REPORT_CHAPTER.md](docs/CHARVEE_REPORT_CHAPTER.md) §3.3 for the breakdown.
 
 ## Per-task scores
 
@@ -67,6 +69,6 @@ Accuracy / ROC / MSRE do **not** apply. This is long-context KV-cache compressio
 
 ## Takeaway
 
-All four ratios use the same memory, about **30% of the full cache** (0.40 GB vs 1.36 GB), and all four scores are within noise of the full cache (95% paired bootstrap interval at ratio 0.95: −0.33 [−1.31, +0.66]). The ratio changes which tokens are kept but not the memory, so ResidualKV is one operating point at about 30% memory, not a 5–25% method. At that memory it ties KVzip 0.75 (47.43), RestoreKV 0.75 (47.31) and TurboQuant MSE 4-bit (47.57). The differences between ratios (47.38–47.85) are noise, so no single ratio should be called best.
+All four ratios use the same memory, about **30% of the full cache** (0.40 GB vs 1.36 GB), and all four scores are within noise of the full cache (95% paired bootstrap interval at ratio 0.95: −0.33 [−1.31, +0.66]). The ratio only sets how many stored tokens are rebuilt for attention; every token stays stored as a reference or a 4-bit residual, so memory does not change. ResidualKV is one operating point: 30% measured, about 14% if the full layers and references were stored packed as in the paper. At that memory it ties KVzip 0.75 (47.43), RestoreKV 0.75 (47.31) and TurboQuant MSE 4-bit (47.57). The differences between ratios (47.38–47.85) are noise, so no single ratio should be called best.
 
 ResidualKV compresses the question together with the document (see the README), unlike the kvpress methods, which favours it slightly in this comparison.
