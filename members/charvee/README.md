@@ -6,7 +6,7 @@ Settings follow Charvee's configs. The runner `run_residualkv.py` was set up by 
 
 Authors' DeltaKV code is vendored at `members/charvee/DeltaKV/` (no separate clone required). Lab zip layout may still use `/app/DeltaKV`; override with `--deltakv-repo` if needed.
 
-**Full LongBench results (lab complete):** see [`RESULTS.md`](RESULTS.md).
+**Full LongBench results (lab complete):** see [`RESULTS.md`](RESULTS.md). Report section: [`docs/CHARVEE_REPORT_CHAPTER.md`](docs/CHARVEE_REPORT_CHAPTER.md).
 
 ## Results summary (800 records, RTX 5090)
 

@@ -105,4 +105,4 @@ Memory = mean computed KV-cache size as a share of the full cache (document + un
 
 ## Not included yet
 
-Runs are added automatically when their 800-record files are committed. Missing at the time of writing: RDKV (result files not yet committed). ResidualKV compresses the question with the document and keeps about 30% of the cache at every ratio; see members/charvee/README.md.
+Runs are added automatically when their 800-record files are committed. Missing at the time of writing: RDKV (result files not yet committed). ResidualKV compresses the question with the document. Its 29.6% is measured with the full layers and references simulated at low precision but stored in bf16; packed as in its paper it is about 14% (see members/charvee/docs/CHARVEE_REPORT_CHAPTER.md).

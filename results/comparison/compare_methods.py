@@ -142,7 +142,7 @@ def main():
                   + " | ".join(f"{r['categories'][c]:.1f}" for c in CATEGORIES) + " |")
     md += ["", "## Not included yet", "",
            "Runs are added automatically when their 800-record files are committed. Missing at the time of writing: "
-           "RDKV (result files not yet committed). ResidualKV compresses the question with the document and keeps about 30% of the cache at every ratio; see members/charvee/README.md.", ""]
+           "RDKV (result files not yet committed). ResidualKV compresses the question with the document. Its 29.6% is measured with the full layers and references simulated at low precision but stored in bf16; packed as in its paper it is about 14% (see members/charvee/docs/CHARVEE_REPORT_CHAPTER.md).", ""]
     if skipped:
         md += ["Files skipped because their record IDs do not match the 800-record baseline: "
                + ", ".join(f"{n} ({k} rows)" for n, k in skipped), ""]
