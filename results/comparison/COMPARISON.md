@@ -46,14 +46,18 @@ Memory = mean computed KV-cache size as a share of the full cache (document + un
 | SnapKV | ratio 0.8 | 21.2% | 38.42 | -9.29 [-11.29, -7.22] | 0 |
 | TriAttention | ratio 0.8 | 21.2% | 37.79 | -9.92 [-11.96, -7.93] | 0 |
 
-## About 24-28%
+## About 24-30%
 
 | Method | Setting | Memory | Score | Δ vs full [95% CI] | OOM |
 |---|---|---|---|---|---|
+| ResidualKV | ratio 0.8 | 29.6% | 47.85 | +0.13 [-0.81, +1.14] | 0 |
 | TurboQuant | MSE 3.5-bit | 24.7% | 47.84 | +0.13 [-0.71, +0.97] | 0 |
+| ResidualKV | ratio 0.75 | 29.6% | 47.83 | +0.12 [-0.80, +1.09] | 0 |
 | TurboQuant | QJL 4-bit | 27.4% | 47.67 | -0.05 [-1.25, +1.19] | 0 |
+| ResidualKV | ratio 0.9 | 29.6% | 47.59 | -0.13 [-1.06, +0.84] | 0 |
 | TurboQuant | MSE 4-bit | 27.0% | 47.57 | -0.15 [-1.01, +0.70] | 0 |
 | KVzip | ratio 0.75 | 26.1% | 47.43 | -0.28 [-1.83, +1.20] | 0 |
+| ResidualKV | ratio 0.95 | 29.6% | 47.38 | -0.33 [-1.31, +0.66] | 0 |
 | RestoreKV | ratio 0.75 | 26.1% | 47.31 | -0.41 [-1.81, +0.98] | 0 |
 | TurboQuant | QJL 3.5-bit | 25.5% | 47.25 | -0.47 [-1.75, +0.72] | 0 |
 | SnapKV | ratio 0.75 | 26.1% | 39.40 | -8.31 [-10.27, -6.24] | 0 |
@@ -94,7 +98,11 @@ Memory = mean computed KV-cache size as a share of the full cache (document + un
 | TriAttention | ratio 0.75 | 26.1% | 27.3 | 27.8 | 25.6 | 61.8 | 45.2 | 51.1 |
 | TurboQuant | MSE 4-bit | 27.0% | 45.1 | 41.6 | 28.9 | 69.8 | 51.2 | 51.1 |
 | TurboQuant | QJL 4-bit | 27.4% | 42.3 | 45.8 | 28.4 | 70.5 | 49.2 | 51.5 |
+| ResidualKV | ratio 0.9 | 29.6% | 44.6 | 42.1 | 26.8 | 70.1 | 52.0 | 53.4 |
+| ResidualKV | ratio 0.95 | 29.6% | 44.6 | 42.1 | 27.0 | 70.3 | 51.0 | 52.2 |
+| ResidualKV | ratio 0.8 | 29.6% | 44.8 | 42.3 | 27.6 | 70.1 | 52.0 | 53.6 |
+| ResidualKV | ratio 0.75 | 29.6% | 45.0 | 42.0 | 27.3 | 69.9 | 52.0 | 54.4 |
 
 ## Not included yet
 
-Runs are added automatically when their 800-record files are committed. Missing at the time of writing: ResidualKV (all budgets) and RDKV (result files not yet committed).
+Runs are added automatically when their 800-record files are committed. Missing at the time of writing: RDKV (result files not yet committed). ResidualKV compresses the question with the document and keeps about 30% of the cache at every ratio; see members/charvee/README.md.
