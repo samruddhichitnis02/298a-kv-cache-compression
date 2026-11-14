@@ -80,7 +80,7 @@ Time per record: median 1.78 s for full cache and about 7.3 s for RestoreKV.
 - **Why the fix matters here.** The bug hit full cache harder than compressed runs. Before the fix, RestoreKV at 20% and 25% appeared to beat full cache.
 - **Memory.** kvpress KVzip and RestoreKV mask evicted pairs and leave them in GPU memory, so peak GPU memory stays around 24 GB on LongBench. Compare methods on the computed `kv_cache_gb`, which includes the uncompressed question.
 - **Interruptions.** The lab machine shut down twice, during the RULER KVzip run and the LongBench 10% run. Both resumed from saved records, and every result file has one row per record with no duplicates.
-- **Still missing.** LongBench KVzip and SnapKV haven't been run, so these tables compare RestoreKV only with full cache. The comparison with published LongBench and RestoreKV numbers is also still to do.
+- **Final results.** KVzip and SnapKV at all four budgets, quantized RestoreKV, follow-up questions and RULER 8K/16K are finished. See [docs/ANEES_REPORT_CHAPTER.md](docs/ANEES_REPORT_CHAPTER.md) and `results/comparison/COMPARISON.md`.
 
 ## RestoreKV + quantization (SAM-96)
 
@@ -114,7 +114,7 @@ A kept token costs 160 bytes per head at 4 bits and 96 at 2 bits, against 512 in
 **Limits**
 - The released adapter was trained on keep ratios of 2.5–25%, and only 4-bit at a 5% budget stays in that range. The adapter is also not trained on quantized caches, which is the case for quantization-aware training in spring.
 - Tokens are rounded in place and evicted pairs are masked, as in kvpress, so accuracy is real but memory is computed, not freed.
-- Results are pending. Mac checks with the real model on 5 LongBench records confirmed the method runs, meets the budget and uses at most 16 or 4 levels per group, but that is too few records to compare accuracy.
+- Results: 4-bit scores 46.63 at 6.4% memory and 47.34 at 11.4% (full cache 47.72); 2-bit scores 45.01 and 44.70. See the report chapter.
 
 ## Follow-up questions (SAM-98)
 
