@@ -6,22 +6,39 @@ Settings follow Charvee's configs. The runner `run_residualkv.py` was set up by 
 
 Authors' DeltaKV code is vendored at `members/charvee/DeltaKV/` (no separate clone required). Lab zip layout may still use `/app/DeltaKV`; override with `--deltakv-repo` if needed.
 
-## How to run (lab RTX 5090, nothing to install)
+**Full LongBench results (lab complete):** see [`RESULTS.md`](RESULTS.md).
+
+## Results summary (800 records, RTX 5090)
+
+Baseline full cache: **47.72**. Files under `results/residualkv/longbench/`.
+
+| ratio | approx keep | average | Δ vs baseline | mean `kv_cache_gb` | mean `full_kv_cache_gb` |
+|------:|------------:|--------:|--------------:|-------------------:|------------------------:|
+| 0.75 | 25% | **47.83** | +0.11 | 0.4017 | 1.3605 |
+| 0.80 | 20% | **47.85** | +0.13 | 0.4016 | 1.3605 |
+| 0.90 | 10% | **47.59** | −0.13 | 0.4015 | 1.3605 |
+| 0.95 | 5% | **47.38** | −0.34 | 0.4015 | 1.3605 |
+
+Quality stays within ~0.3 of baseline. Logged KV is ~**0.40 GB** vs ~**1.36 GB** full (~3.4× smaller). The ratio is not an exact memory percentage (full layers + sink/recent + residuals remain).
+
+## How to run (lab RTX 5090)
 
 ```bash
 cd /app/298a-kv-cache-compression
+pip install --break-system-packages transformers==5.2.0 rouge rapidfuzz loguru accelerate
+# hf auth login   # gated Llama access
 
-# 1. Quick check, 2 records per task (about 10 minutes). Stop here if it fails.
+# 1. Quick check, 2 records per task (~10 minutes)
 python members/charvee/run_residualkv.py --compression-ratio 0.9 --per-task 2
 
-# 2. Full runs, 0.75 and 0.9 first, then 0.8 and 0.95
+# 2. Full runs
 python members/charvee/run_residualkv.py --compression-ratio 0.9
 python members/charvee/run_residualkv.py --compression-ratio 0.75
 python members/charvee/run_residualkv.py --compression-ratio 0.8
 python members/charvee/run_residualkv.py --compression-ratio 0.95
 ```
 
-Results go to `results/residualkv/longbench/`. If the machine stops, run the same command again and it picks up where it left off. Back up that folder to Drive before leaving the lab.
+Reruns skip `record_id`s already in the jsonl.
 
 ## Memory
 
@@ -29,12 +46,5 @@ ResidualKV keeps layers 0, 1, 2, 8 and 18 whole (4-bit), plus 8 sink and 128 rec
 
 ## Differences from the shared harness
 
-- ResidualKV compresses the whole prompt, keeping the last 128 tokens, which usually include the question. kvpress methods compress only the document.
+- ResidualKV compresses the whole prompt, keeping the last 128 tokens, which usually include the question. kvpress methods compress only the document, so ResidualKV chooses what to keep with the question in view. Read the comparison with this in mind.
 - The attention kernel is PyTorch's `sdpa`, because the lab image has no flash-attn.
-
-## Status
-
-- [ ] Quick check on the lab GPU
-- [ ] Full runs at 0.75 and 0.9
-- [ ] Full runs at 0.8 and 0.95
-- [ ] Results table and report section
