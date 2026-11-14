@@ -10,7 +10,7 @@ Authors' DeltaKV code is vendored at `members/charvee/DeltaKV/` (no separate clo
 
 ## Results summary (800 records, RTX 5090)
 
-Baseline full cache: **47.72**. Files under `results/residualkv/longbench/`; tarball at `lab_artifacts/residualkv_results.tgz`.
+Baseline full cache: **47.72**. Files under `results/residualkv/longbench/`.
 
 | ratio | approx keep | average | Δ vs baseline | mean `kv_cache_gb` | mean `full_kv_cache_gb` |
 |------:|------------:|--------:|--------------:|-------------------:|------------------------:|
@@ -43,3 +43,8 @@ Reruns skip `record_id`s already in the jsonl.
 ## Memory
 
 ResidualKV keeps layers 0, 1, 2, 8 and 18 whole (4-bit), plus 8 sink and 128 recent tokens, and stores compressed residuals for dropped tokens. So `--compression-ratio 0.9` is **not** a 10% cache. Each record logs the bytes actually held in its cache (`kv_cache_gb`) and the bf16 size of a full cache for the same tokens (`full_kv_cache_gb`). Compare methods on `kv_cache_gb`.
+
+## Differences from the shared harness
+
+- ResidualKV compresses the whole prompt, keeping the last 128 tokens, which usually include the question. kvpress methods compress only the document, so ResidualKV chooses what to keep with the question in view. Read the comparison with this in mind.
+- The attention kernel is PyTorch's `sdpa`, because the lab image has no flash-attn.

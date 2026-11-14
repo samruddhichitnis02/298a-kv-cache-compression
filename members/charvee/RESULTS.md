@@ -8,8 +8,7 @@
 **Runner:** `members/charvee/run_residualkv.py` (HF + sdpa)  
 **Baseline:** `results/longbench/Llama-3.1-8B-Instruct_none_0.0` → average **47.72**
 
-Raw files: `results/residualkv/longbench/`  
-Archive copy: `members/charvee/lab_artifacts/residualkv_results.tgz`
+Raw files: `results/residualkv/longbench/`
 
 ## Overall quality vs baseline
 
@@ -68,4 +67,6 @@ Accuracy / ROC / MSRE do **not** apply. This is long-context KV-cache compressio
 
 ## Takeaway
 
-ResidualKV matches full-cache LongBench quality on the team 800-record set while logging ~**0.40 GB** mean KV vs ~**1.36 GB** full. Prefer **0.80** (best average 47.85) or **0.75** when reporting a single operating point; **0.95** is still within 0.34 of baseline if a more aggressive drop ratio is required for the equal-memory comparison.
+All four ratios use the same memory, about **30% of the full cache** (0.40 GB vs 1.36 GB), and all four scores are within noise of the full cache (95% paired bootstrap interval at ratio 0.95: −0.33 [−1.31, +0.66]). The ratio changes which tokens are kept but not the memory, so ResidualKV is one operating point at about 30% memory, not a 5–25% method. At that memory it ties KVzip 0.75 (47.43), RestoreKV 0.75 (47.31) and TurboQuant MSE 4-bit (47.57). The differences between ratios (47.38–47.85) are noise, so no single ratio should be called best.
+
+ResidualKV compresses the question together with the document (see the README), unlike the kvpress methods, which favours it slightly in this comparison.
