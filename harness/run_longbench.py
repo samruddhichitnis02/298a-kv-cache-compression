@@ -89,9 +89,11 @@ def make_turboquant_press(name, layer_config=None):
     return TurboQuantPress(bits=float(match.group(2)), qjl_keys=match.group(1) is None)
 
 
-def make_press(name, compression_ratio, layer_config=None):
+def make_press(name, compression_ratio, layer_config=None, triattention_stats=None):
     if name == "none":
         return None
+    if name == "triattention" and triattention_stats:
+        return TriAttentionPress(compression_ratio=compression_ratio, stats_path=str(triattention_stats))
     if name in ("restorekv_4bit", "restorekv_2bit"):
         return QuantizedRestoreKVPress(compression_ratio=compression_ratio, bits=int(name.split("_")[1][0]))
     if name.startswith("turboquant_"):
@@ -186,6 +188,8 @@ def main():
                         help="prefill the context in chunks of this many tokens so long prompts fit in "
                              "GPU memory (enables the full dev set). Compression is applied after each chunk.")
     parser.add_argument("--output-dir", type=Path, default=OUT_DIR)
+    parser.add_argument("--triattention-stats", type=Path, default=None,
+                        help="TriAttention calibration file (default: members/samruddhi/calibration/llama31_8b_stats.pt)")
     args = parser.parse_args()
     if args.press.startswith("turboquant_") and args.compression_ratio != 0:
         parser.error("TurboQuant rate is selected by its bit setting; --compression-ratio must be 0")
@@ -245,7 +249,7 @@ def main():
         saved_revisions = {json.loads(line).get("model_revision") for line in out_file.open()}
         if saved_revisions != {getattr(pipe.model.config, "_commit_hash", None)}:
             raise ValueError("loaded model revision differs from saved predictions; choose a new output directory")
-    press = make_press(args.press, ratio, args.turboquant_layer_config)
+    press = make_press(args.press, ratio, args.turboquant_layer_config, args.triattention_stats)
     if args.press.startswith("restorekv"):
         # Load the LoRA adapter now so it lands on the model's device (see members/anees/smoke_test.py)
         press.post_init_from_model(pipe.model)

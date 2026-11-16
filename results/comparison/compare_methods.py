@@ -102,6 +102,8 @@ def main():
             skipped.append((name, len(rows)))
             continue
         family, setting = label(name)
+        if "trainsplit_calibration" in f:
+            setting += ", recalibrated"
         kv = [r.get("kv_cache_gb") for r in rows.values()]
         mem = 100 * (sum(kv) / len(kv)) / base_kv if all(k is not None for k in kv) else None
         lo, hi = paired_ci(rows, base, tasks)
@@ -142,7 +144,9 @@ def main():
                   + " | ".join(f"{r['categories'][c]:.1f}" for c in CATEGORIES) + " |")
     md += ["", "## Not included yet", "",
            "Runs are added automatically when their 800-record files are committed. Missing at the time of writing: "
-           "RDKV (result files not yet committed). ResidualKV compresses the question with the document. Its 29.6% is measured with the full layers and references simulated at low precision but stored in bf16; packed as in its paper it is about 14% (see members/charvee/docs/CHARVEE_REPORT_CHAPTER.md).", ""]
+           "RDKV (result files not yet committed). ResidualKV compresses the question with the document. Its 29.6% is measured with the full layers and references simulated at low precision but stored in bf16; packed as in its paper it is about 14% (see members/charvee/docs/CHARVEE_REPORT_CHAPTER.md). "
+           "TriAttention rows without \"recalibrated\" use the Nov 10 calibration (five sentences repeated to 4,096 tokens), "
+           "which the authors advise against; they likely understate the method (see members/samruddhi/docs/SAMRUDDHI_REPORT_CHAPTER.md).", ""]
     if skipped:
         md += ["Files skipped because their record IDs do not match the 800-record baseline: "
                + ", ".join(f"{n} ({k} rows)" for n, k in skipped), ""]

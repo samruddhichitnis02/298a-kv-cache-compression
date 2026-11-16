@@ -19,6 +19,7 @@ earlier, so measured results reflect TriAttention as designed.
 """
 
 import argparse
+import json
 import sys
 from pathlib import Path
 
@@ -26,6 +27,9 @@ import torch
 from transformers import AutoConfig, AutoModelForCausalLM, AutoTokenizer
 
 HERE = Path(__file__).resolve().parent
+REPO = HERE.parents[1]
+# Natural-prose tasks (books, reports, articles, papers); code and synthetic tasks are left out.
+PROSE_TASKS = {"narrativeqa", "gov_report", "multi_news", "qasper", "multifieldqa_en"}
 
 
 def rotate_half(x):
@@ -60,14 +64,46 @@ DEFAULT_TEXT = (
 )
 
 
+def train_split_text(data_path, tok, max_length):
+    """Natural calibration text, as the authors ask: whole LongBench documents from the train split.
+
+    Train = every processed record that is in neither the validation (dev_ids.json) nor the test
+    split (test_ids.json), and whose document does not appear in either of them. Documents come
+    from the prose tasks, in record_id order, each used once, until max_length tokens are reached.
+    """
+    splits = REPO / "Data_pipeline" / "processed_longbench"
+    dev = json.load(open(splits / "dev_ids.json"))
+    dev = set(dev if isinstance(dev, list) else next(v for v in dev.values() if isinstance(v, list)))
+    held_out = dev | set(json.load(open(splits / "test_ids.json"))["test_ids"])
+    records = [json.loads(line) for line in open(data_path, encoding="utf-8") if line.strip()]
+    held_docs = {r["context"] for r in records if r["record_id"] in held_out}
+    seen, parts, n_tokens = set(), [], 0
+    for r in sorted(records, key=lambda r: r["record_id"]):
+        if (r["task"] not in PROSE_TASKS or r["record_id"] in held_out
+                or r["context"] in held_docs or r["context"] in seen):
+            continue
+        seen.add(r["context"])
+        parts.append(r["context"])
+        n_tokens += len(tok(r["context"], add_special_tokens=False).input_ids)
+        if n_tokens >= max_length:
+            break
+    print(f"calibration text: {len(parts)} train-split documents, {n_tokens} tokens", file=sys.stderr)
+    return "\n\n".join(parts)
+
+
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("--model", default="meta-llama/Llama-3.1-8B-Instruct")
     p.add_argument("--input", default=None,
-                   help="plain-text calibration file (defaults to a built-in prose sample repeated to --max-length)")
+                   help="plain-text calibration file (default: LongBench train-split documents, see train_split_text)")
+    p.add_argument("--data", default=str(REPO / "data" / "processed_longbench" / "processed_longbench.jsonl"),
+                   help="processed LongBench export used to build the default calibration text")
+    p.add_argument("--repeated-sample", action="store_true",
+                   help="old behaviour: repeat the built-in DEFAULT_TEXT. The authors advise against repetitive "
+                        "calibration text; kept only to reproduce the Nov 10 stats file.")
     p.add_argument("--output", default=str(HERE / "calibration" / "llama31_8b_stats.pt"))
-    p.add_argument("--max-length", type=int, default=4096,
-                   help="calibration token length (authors use up to 32768; 4096 gives stable per-head means)")
+    p.add_argument("--max-length", type=int, default=32768,
+                   help="calibration token length (authors' default 32768)")
     p.add_argument("--device", default="cuda")
     args = p.parse_args()
 
@@ -92,10 +128,12 @@ def main():
     # --- calibration text ---
     if args.input:
         text = Path(args.input).read_text(encoding="utf-8")
-    else:
+    elif args.repeated_sample:
         text = DEFAULT_TEXT
         while len(tok(text, add_special_tokens=False).input_ids) < args.max_length:
             text += DEFAULT_TEXT
+    else:
+        text = train_split_text(args.data, tok, args.max_length)
     input_ids = tok.encode(text, return_tensors="pt", truncation=True, max_length=args.max_length).to(device)
     seq_len = input_ids.shape[1]
     print(f"calibration tokens: {seq_len}", file=sys.stderr)
@@ -143,13 +181,14 @@ def main():
                for i, attn in enumerate(attn_layers)]
     print("forward pass...", file=sys.stderr)
     with torch.no_grad():
-        model(input_ids)
+        backbone(input_ids)  # the hooks need attention inputs only; skipping lm_head avoids a seq_len x vocab logits tensor
     for h in handles:
         h.remove()
 
     payload = {
         "metadata": {
-            "num_traces": 1, "head_dim": head_dim, "dtype": "bfloat16",
+            "num_traces": 1, "head_dim": head_dim, "dtype": "bfloat16", "calibration_tokens": int(seq_len),
+            "calibration_source": args.input or ("repeated DEFAULT_TEXT" if args.repeated_sample else "LongBench train split"),
             "rope_style": "half",
             "sampled_heads": [[int(l), int(h)] for l, h in sampled],
         },
