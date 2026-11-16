@@ -56,6 +56,10 @@ On top of the reproduction, we ran three extensions:
 - SnapKV trails RestoreKV by 8–11 points at every budget.
 - The biggest losses at 6.4% are on exact lookup: passage_retrieval_en falls from 100 to 14, and code completion (lcc) from 54.5 to 37.5. Summarization holds up and is where the restore tokens help most: at 6.4%, RestoreKV keeps multi_news at 24.98 (full 27.01) and qmsum at 25.32 (full 25.06), while KVzip falls to 11.17 and 20.25.
 
+![RestoreKV against eviction baselines](../../../report/figures/restorekv_score_vs_memory.png)
+
+*Figure 1. LongBench score against memory used. RestoreKV (bf16, 4-bit, 2-bit), KVzip and SnapKV.*
+
 ### 3.2 Quantization at equal memory (N1)
 
 | Memory | RestoreKV bf16 | 4-bit | 2-bit | Full cache |
@@ -76,6 +80,10 @@ Change from bf16 RestoreKV at the same memory:
 - A likely reason 2-bit gains little at 11.4%: it keeps 53% of the tokens there, far outside the 2.5–25% keep range the released adapter was trained on. It also rounds every value to one of 4 levels.
 
 In the full comparison of all team methods (`results/comparison/COMPARISON.md`), RestoreKV 4-bit is the best method below 15% memory by a wide margin. The next best at 6.4% is bf16 RestoreKV at 36.13.
+
+![Quantization at equal memory](../../../report/figures/restorekv_quantization.png)
+
+*Figure 2. Change from the full cache at the same memory, with 95% paired bootstrap intervals. Numbers under the bars are the scores.*
 
 ### 3.3 Follow-up questions (N3)
 
@@ -104,6 +112,10 @@ Setup: 125 documents (qasper 43, qmsum 34, multifieldqa_en 28, narrativeqa 20) a
 - Its score stays roughly flat (77–80), while KVzip's falls by 5.6 points from 4K to 16K.
 - Both methods fail on common-word extraction (cwe: 2–9), which needs counts over the whole context and cannot survive keeping 5% of the tokens.
 - RestoreKV holds up best on the multi-key and multi-value needle tasks. For example, on niah_multikey_3 at 16K it scores 84, against KVzip's 4.
+
+![Length sweep](../../../report/figures/restorekv_length_sweep.png)
+
+*Figure 3. RULER average at 4K, 8K and 16K for the full cache, RestoreKV and KVzip at ratio 0.95.*
 
 ### 3.5 Cost
 
@@ -141,6 +153,7 @@ python harness/run_ruler.py --press restorekv --compression-ratio 0.95 --length 
 python results/comparison/compare_methods.py
 python members/anees/score_followup.py
 python members/anees/make_results_csv.py
+python members/anees/make_figures.py          # report/figures/restorekv_*.png
 ```
 
 Result files: `results/restorekv/` (LongBench, RULER, follow-up), `results/longbench/` (full-cache baseline), `results/anees.csv` (frozen numbers), `results/comparison/` (all methods).
