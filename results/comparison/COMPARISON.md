@@ -105,4 +105,4 @@ Memory = mean computed KV-cache size as a share of the full cache (document + un
 
 ## Not included yet
 
-Runs are added automatically when their 800-record files are committed. Missing at the time of writing: RDKV (result files not yet committed). ResidualKV compresses the question with the document. Its 29.6% is measured with the full layers and references simulated at low precision but stored in bf16; packed as in its paper it is about 14% (see members/charvee/docs/CHARVEE_REPORT_CHAPTER.md).
+Runs are added automatically when their 800-record files are committed. Missing at the time of writing: RDKV (result files not yet committed). ResidualKV compresses the question with the document. Its 29.6% is measured with the full layers and references simulated at low precision but stored in bf16; packed as in its paper it is about 14% (see members/charvee/docs/CHARVEE_REPORT_CHAPTER.md). TriAttention rows without "recalibrated" use the Nov 10 calibration (five sentences repeated to 4,096 tokens), which the authors advise against; they likely understate the method (see members/samruddhi/docs/SAMRUDDHI_REPORT_CHAPTER.md).

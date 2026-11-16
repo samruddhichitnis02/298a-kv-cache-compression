@@ -40,6 +40,8 @@ text, record the per-head frequency statistics (the "centers" and "norms" the me
 importance), and save them to a file (`calibration/llama31_8b_stats.pt`). This file is reused for every
 run. It is computed with the authors' exact procedure, so the scoring matches the paper.
 
+> **Note (Nov 15).** The calibration text was five sentences repeated to 4,096 tokens, which the authors' calibration guide advises against (they recommend natural text near 32,768 tokens). A re-run with natural train-split text is set up; see [docs/SAMRUDDHI_REPORT_CHAPTER.md](docs/SAMRUDDHI_REPORT_CHAPTER.md) §4.
+
 **Stage 2: Build the data (one time).** We prepared the 800 LongBench documents into a single file,
 tokenized for Llama-3.1-8B, using the official LongBench prompts (`build_dev_data.py`).
 
