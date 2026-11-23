@@ -10,6 +10,7 @@ Memory = mean computed KV-cache size as a share of the full cache (document + un
 |---|---|---|---|---|---|
 | RestoreKV | 4-bit, ratio 0.95 | 6.4% | 46.63 | -1.09 [-2.92, +0.74] | 0 |
 | RestoreKV | 2-bit, ratio 0.95 | 6.4% | 45.01 | -2.71 [-4.44, -1.06] | 0 |
+| RDKV | ratio 0.95 | 6.6% | 38.03 | -9.69 [-11.76, -7.66] | 0 |
 | RestoreKV | ratio 0.95 | 6.4% | 36.13 | -11.58 [-13.90, -9.14] | 0 |
 | TriAttention | ratio 0.95 | 6.4% | 31.41 | -16.31 [-18.62, -14.05] | 0 |
 | KVzip | ratio 0.95 | 6.4% | 28.32 | -19.40 [-21.70, -17.10] | 0 |
@@ -22,6 +23,7 @@ Memory = mean computed KV-cache size as a share of the full cache (document + un
 | RestoreKV | 4-bit, ratio 0.9 | 11.4% | 47.34 | -0.38 [-1.78, +0.96] | 0 |
 | RestoreKV | 2-bit, ratio 0.9 | 11.4% | 44.70 | -3.02 [-4.72, -1.37] | 0 |
 | RestoreKV | ratio 0.9 | 11.4% | 43.29 | -4.42 [-6.43, -2.38] | 0 |
+| RDKV | ratio 0.9 | 11.6% | 42.58 | -5.14 [-6.83, -3.42] | 0 |
 | KVzip | ratio 0.9 | 11.4% | 41.61 | -6.11 [-8.19, -4.01] | 0 |
 | TriAttention | ratio 0.9 | 11.4% | 33.10 | -14.62 [-17.01, -12.31] | 0 |
 | SnapKV | ratio 0.9 | 11.4% | 32.64 | -15.08 [-17.34, -12.80] | 0 |
@@ -38,6 +40,7 @@ Memory = mean computed KV-cache size as a share of the full cache (document + un
 |---|---|---|---|---|---|
 | TurboQuant | MSE 3-bit | 20.8% | 47.90 | +0.18 [-0.85, +1.25] | 0 |
 | RestoreKV | ratio 0.8 | 21.2% | 47.63 | -0.09 [-1.80, +1.56] | 0 |
+| RDKV | ratio 0.8 | 21.7% | 46.92 | -0.80 [-2.10, +0.48] | 0 |
 | TurboQuant | MSE 2.5-bit | 18.5% | 46.44 | -1.28 [-2.71, +0.12] | 0 |
 | KVzip | ratio 0.8 | 21.2% | 46.00 | -1.72 [-3.53, -0.07] | 0 |
 | TurboQuant | adaptive | 21.2% | 44.57 | -3.14 [-4.88, -1.44] | 0 |
@@ -60,6 +63,7 @@ Memory = mean computed KV-cache size as a share of the full cache (document + un
 | ResidualKV | ratio 0.95 | 29.6% | 47.38 | -0.33 [-1.31, +0.66] | 0 |
 | RestoreKV | ratio 0.75 | 26.1% | 47.31 | -0.41 [-1.81, +0.98] | 0 |
 | TurboQuant | QJL 3.5-bit | 25.5% | 47.25 | -0.47 [-1.75, +0.72] | 0 |
+| RDKV | ratio 0.75 | 26.7% | 47.16 | -0.55 [-1.57, +0.47] | 0 |
 | SnapKV | ratio 0.75 | 26.1% | 39.40 | -8.31 [-10.27, -6.24] | 0 |
 | TriAttention | ratio 0.75 | 26.1% | 38.74 | -8.97 [-10.96, -7.10] | 0 |
 
@@ -74,12 +78,14 @@ Memory = mean computed KV-cache size as a share of the full cache (document + un
 | TriAttention | ratio 0.95 | 6.4% | 18.1 | 25.0 | 21.4 | 57.5 | 20.7 | 47.6 |
 | KVzip | ratio 0.95 | 6.4% | 28.9 | 24.9 | 16.1 | 47.9 | 7.0 | 42.8 |
 | SnapKV | ratio 0.95 | 6.4% | 17.4 | 17.0 | 18.3 | 56.5 | 6.0 | 48.2 |
+| RDKV | ratio 0.95 | 6.6% | 27.5 | 29.4 | 23.4 | 67.6 | 32.7 | 49.6 |
 | RestoreKV | 4-bit, ratio 0.9 | 11.4% | 43.3 | 40.6 | 29.0 | 69.9 | 50.1 | 54.4 |
 | RestoreKV | 2-bit, ratio 0.9 | 11.4% | 39.1 | 35.5 | 27.9 | 67.9 | 48.6 | 53.2 |
 | RestoreKV | ratio 0.9 | 11.4% | 44.3 | 36.8 | 28.3 | 66.8 | 30.0 | 52.0 |
 | KVzip | ratio 0.9 | 11.4% | 39.9 | 39.4 | 27.2 | 61.9 | 28.5 | 51.8 |
 | TriAttention | ratio 0.9 | 11.4% | 19.6 | 24.7 | 22.7 | 59.5 | 29.1 | 45.9 |
 | SnapKV | ratio 0.9 | 11.4% | 21.6 | 23.0 | 21.1 | 62.5 | 19.1 | 49.7 |
+| RDKV | ratio 0.9 | 11.6% | 33.7 | 35.9 | 25.4 | 70.0 | 40.5 | 52.7 |
 | TurboQuant | QJL 2-bit | 15.0% | 12.1 | 5.5 | 16.7 | 21.1 | 6.5 | 30.1 |
 | TurboQuant | MSE 2.5-bit | 18.5% | 41.3 | 40.6 | 27.7 | 70.2 | 51.3 | 50.5 |
 | TurboQuant | QJL 2.5-bit | 19.3% | 32.6 | 32.1 | 27.3 | 67.1 | 37.7 | 42.8 |
@@ -90,12 +96,14 @@ Memory = mean computed KV-cache size as a share of the full cache (document + un
 | KVzip | ratio 0.8 | 21.2% | 43.6 | 39.9 | 28.7 | 66.5 | 45.8 | 54.2 |
 | SnapKV | ratio 0.8 | 21.2% | 28.3 | 32.0 | 23.4 | 65.5 | 31.1 | 52.2 |
 | TriAttention | ratio 0.8 | 21.2% | 25.5 | 27.1 | 24.7 | 61.1 | 44.8 | 50.0 |
+| RDKV | ratio 0.8 | 21.7% | 39.1 | 43.4 | 27.7 | 69.9 | 50.6 | 54.5 |
 | TurboQuant | MSE 3.5-bit | 24.7% | 45.0 | 42.0 | 28.7 | 70.0 | 51.2 | 52.8 |
 | TurboQuant | QJL 3.5-bit | 25.5% | 42.4 | 42.7 | 28.0 | 69.0 | 51.4 | 53.4 |
 | KVzip | ratio 0.75 | 26.1% | 44.8 | 40.6 | 28.7 | 67.7 | 52.0 | 55.0 |
 | RestoreKV | ratio 0.75 | 26.1% | 44.4 | 39.9 | 28.9 | 67.8 | 51.3 | 55.7 |
 | SnapKV | ratio 0.75 | 26.1% | 28.5 | 32.1 | 24.4 | 66.2 | 35.3 | 53.2 |
 | TriAttention | ratio 0.75 | 26.1% | 27.3 | 27.8 | 25.6 | 61.8 | 45.2 | 51.1 |
+| RDKV | ratio 0.75 | 26.7% | 40.7 | 41.8 | 27.9 | 70.6 | 52.4 | 53.5 |
 | TurboQuant | MSE 4-bit | 27.0% | 45.1 | 41.6 | 28.9 | 69.8 | 51.2 | 51.1 |
 | TurboQuant | QJL 4-bit | 27.4% | 42.3 | 45.8 | 28.4 | 70.5 | 49.2 | 51.5 |
 | ResidualKV | ratio 0.9 | 29.6% | 44.6 | 42.1 | 26.8 | 70.1 | 52.0 | 53.4 |
@@ -103,6 +111,6 @@ Memory = mean computed KV-cache size as a share of the full cache (document + un
 | ResidualKV | ratio 0.8 | 29.6% | 44.8 | 42.3 | 27.6 | 70.1 | 52.0 | 53.6 |
 | ResidualKV | ratio 0.75 | 29.6% | 45.0 | 42.0 | 27.3 | 69.9 | 52.0 | 54.4 |
 
-## Not included yet
+## Notes
 
-Runs are added automatically when their 800-record files are committed. Missing at the time of writing: RDKV (result files not yet committed). ResidualKV compresses the question with the document. Its 29.6% is measured with the full layers and references simulated at low precision but stored in bf16; packed as in its paper it is about 14% (see members/charvee/docs/CHARVEE_REPORT_CHAPTER.md). TriAttention rows without "recalibrated" use the Nov 10 calibration (five sentences repeated to 4,096 tokens), which the authors advise against; they likely understate the method (see members/samruddhi/docs/SAMRUDDHI_REPORT_CHAPTER.md).
+Runs are added automatically when their 800-record files are committed. RDKV is a re-implementation (no official code); its memory includes quantizer metadata (`rdkv_kv_cache_gb`). ResidualKV compresses the question with the document. Its 29.6% is measured with the full layers and references simulated at low precision but stored in bf16; packed as in its paper it is about 14% (see members/charvee/docs/CHARVEE_REPORT_CHAPTER.md). TriAttention rows without "recalibrated" use the Nov 10 calibration (five sentences repeated to 4,096 tokens), which the authors advise against; they likely understate the method (see members/samruddhi/docs/SAMRUDDHI_REPORT_CHAPTER.md).

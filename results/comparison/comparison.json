@@ -145,6 +145,28 @@
    "source": "results/restorekv/longbench/Llama-3.1-8B-Instruct_snapkv_0.95.jsonl"
   },
   {
+   "run": "Llama-3.1-8B-Instruct_rdkv_0.95",
+   "family": "RDKV",
+   "setting": "ratio 0.95",
+   "score": 38.028388330497,
+   "delta": -9.687260137712755,
+   "ci": [
+    -11.761460816443998,
+    -7.6596585385975215
+   ],
+   "memory_pct": 6.598375087573769,
+   "oom": 0,
+   "categories": {
+    "Single-doc QA": 27.486661781544353,
+    "Multi-doc QA": 29.409843424549305,
+    "Summarization": 23.441359503170048,
+    "Few-shot": 67.61367990956585,
+    "Synthetic": 32.666666666666664,
+    "Code": 49.63312304906509
+   },
+   "source": "results/rdkv/longbench/Llama-3.1-8B-Instruct_rdkv_0.95.jsonl"
+  },
+  {
    "run": "Llama-3.1-8B-Instruct_restorekv_4bit_0.9",
    "family": "RestoreKV",
    "setting": "4-bit, ratio 0.9",
@@ -275,6 +297,28 @@
     "Code": 49.667136770008
    },
    "source": "results/restorekv/longbench/Llama-3.1-8B-Instruct_snapkv_0.9.jsonl"
+  },
+  {
+   "run": "Llama-3.1-8B-Instruct_rdkv_0.9",
+   "family": "RDKV",
+   "setting": "ratio 0.9",
+   "score": 42.57780374679657,
+   "delta": -5.137844721413188,
+   "ci": [
+    -6.827782051845143,
+    -3.4176941071624234
+   ],
+   "memory_pct": 11.64405157699089,
+   "oom": 0,
+   "categories": {
+    "Single-doc QA": 33.734642648107055,
+    "Multi-doc QA": 35.868581418581414,
+    "Summarization": 25.37139759628589,
+    "Few-shot": 69.9580332299179,
+    "Synthetic": 40.542857142857144,
+    "Code": 52.68059049217706
+   },
+   "source": "results/rdkv/longbench/Llama-3.1-8B-Instruct_rdkv_0.9.jsonl"
   },
   {
    "run": "Llama-3.1-8B-Instruct_turboquant_2bit_0.0",
@@ -497,6 +541,28 @@
    "source": "results/triattention/longbench/Llama-3.1-8B-Instruct_triattention_0.8.jsonl"
   },
   {
+   "run": "Llama-3.1-8B-Instruct_rdkv_0.8",
+   "family": "RDKV",
+   "setting": "ratio 0.8",
+   "score": 46.920082811183775,
+   "delta": -0.7955656570259819,
+   "ci": [
+    -2.1021769645830104,
+    0.4798752287096598
+   ],
+   "memory_pct": 21.694978809173517,
+   "oom": 0,
+   "categories": {
+    "Single-doc QA": 39.11320782531944,
+    "Multi-doc QA": 43.44631528315739,
+    "Summarization": 27.721585342954437,
+    "Few-shot": 69.9013324561704,
+    "Synthetic": 50.56666666666666,
+    "Code": 54.520334461401106
+   },
+   "source": "results/rdkv/longbench/Llama-3.1-8B-Instruct_rdkv_0.8.jsonl"
+  },
+  {
    "run": "Llama-3.1-8B-Instruct_turboquant_mse_3.5bit_0.0",
    "family": "TurboQuant",
    "setting": "MSE 3.5-bit",
@@ -627,6 +693,28 @@
     "Code": 51.08905803310492
    },
    "source": "results/triattention/longbench/Llama-3.1-8B-Instruct_triattention_0.75.jsonl"
+  },
+  {
+   "run": "Llama-3.1-8B-Instruct_rdkv_0.75",
+   "family": "RDKV",
+   "setting": "ratio 0.75",
+   "score": 47.16102150905708,
+   "delta": -0.554626959152678,
+   "ci": [
+    -1.5736957851850153,
+    0.46523609785332176
+   ],
+   "memory_pct": 26.693387563382753,
+   "oom": 0,
+   "categories": {
+    "Single-doc QA": 40.66922507651972,
+    "Multi-doc QA": 41.81859633543845,
+    "Summarization": 27.881374435758346,
+    "Few-shot": 70.56683789654402,
+    "Synthetic": 52.4,
+    "Code": 53.48412145606585
+   },
+   "source": "results/rdkv/longbench/Llama-3.1-8B-Instruct_rdkv_0.75.jsonl"
   },
   {
    "run": "Llama-3.1-8B-Instruct_turboquant_mse_4bit_0.0",

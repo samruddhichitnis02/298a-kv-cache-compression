@@ -104,7 +104,8 @@ def main():
         family, setting = label(name)
         if "trainsplit_calibration" in f:
             setting += ", recalibrated"
-        kv = [r.get("kv_cache_gb") for r in rows.values()]
+        # RDKV logs its size with quantizer metadata in its own column; use that one.
+        kv = [r.get("rdkv_kv_cache_gb", r.get("kv_cache_gb")) for r in rows.values()]
         mem = 100 * (sum(kv) / len(kv)) / base_kv if all(k is not None for k in kv) else None
         lo, hi = paired_ci(rows, base, tasks)
         pt = per_task(rows)
@@ -142,9 +143,9 @@ def main():
     for r in runs:
         md.append(f"| {r['family']} | {r['setting']} | {r['memory_pct']:.1f}% | "
                   + " | ".join(f"{r['categories'][c]:.1f}" for c in CATEGORIES) + " |")
-    md += ["", "## Not included yet", "",
-           "Runs are added automatically when their 800-record files are committed. Missing at the time of writing: "
-           "RDKV (result files not yet committed). ResidualKV compresses the question with the document. Its 29.6% is measured with the full layers and references simulated at low precision but stored in bf16; packed as in its paper it is about 14% (see members/charvee/docs/CHARVEE_REPORT_CHAPTER.md). "
+    md += ["", "## Notes", "",
+           "Runs are added automatically when their 800-record files are committed. "
+           "RDKV is a re-implementation (no official code); its memory includes quantizer metadata (`rdkv_kv_cache_gb`). ResidualKV compresses the question with the document. Its 29.6% is measured with the full layers and references simulated at low precision but stored in bf16; packed as in its paper it is about 14% (see members/charvee/docs/CHARVEE_REPORT_CHAPTER.md). "
            "TriAttention rows without \"recalibrated\" use the Nov 10 calibration (five sentences repeated to 4,096 tokens), "
            "which the authors advise against; they likely understate the method (see members/samruddhi/docs/SAMRUDDHI_REPORT_CHAPTER.md).", ""]
     if skipped:
