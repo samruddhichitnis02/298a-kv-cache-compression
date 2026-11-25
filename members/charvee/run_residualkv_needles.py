@@ -107,6 +107,11 @@ def main():
     _, model = get_generate_api(model_path, config, deltakv_checkpoint_path=snapshot_download(args.compressor),
                                 tokenizer_path=model_path, backend="hf", return_kv_cache=True, return_model=True)
     tokenizer = AutoTokenizer.from_pretrained(model_path)
+    # manual_generate tokenises with padding=True and uses pad_token_id; Llama-3.1 has no pad token,
+    # so set it as DeltaKV's own generate() does (get_chat_api.py), or the first document fails.
+    if tokenizer.pad_token is None:
+        tokenizer.pad_token = tokenizer.eos_token
+    tokenizer.padding_side = "left"
     no_bos = NoBos(tokenizer)
     stop = model.generation_config.eos_token_id
     stop = stop if isinstance(stop, list) else [stop]
