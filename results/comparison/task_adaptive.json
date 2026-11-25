@@ -535,5 +535,175 @@
     "triviaqa": "0.95"
    }
   }
+ },
+ "rule_without_task_label": {
+  "RestoreKV@0.9": {
+   "target": "0.9",
+   "records": 800,
+   "memory_gb_mean": 0.154232,
+   "fixed": 43.29320668335832,
+   "adaptive_held_out": 45.31701804016149,
+   "per_task_held_out": 45.32061648385237,
+   "per_task_upper_bound": 46.908475239398214,
+   "adaptive_memory_vs_fixed": 0.9976695011411377,
+   "adaptive_gain_sd": 0.5776544723532848,
+   "repeats": 20
+  },
+  "RestoreKV@0.8": {
+   "target": "0.8",
+   "records": 800,
+   "memory_gb_mean": 0.28792387500000016,
+   "fixed": 47.62725187896636,
+   "adaptive_held_out": 47.19527884496503,
+   "per_task_held_out": 46.82222435584523,
+   "per_task_upper_bound": 48.89063521285076,
+   "adaptive_memory_vs_fixed": 0.9065214286241463,
+   "adaptive_gain_sd": 0.6375230704484275,
+   "repeats": 20
+  },
+  "KVzip@0.9": {
+   "target": "0.9",
+   "records": 800,
+   "memory_gb_mean": 0.154232,
+   "fixed": 41.60893203721837,
+   "adaptive_held_out": 44.3205976832664,
+   "per_task_held_out": 44.50194972155304,
+   "per_task_upper_bound": 45.88168404811882,
+   "adaptive_memory_vs_fixed": 1.00425106333316,
+   "adaptive_gain_sd": 0.6580625712560823,
+   "repeats": 20
+  },
+  "KVzip@0.8": {
+   "target": "0.8",
+   "records": 800,
+   "memory_gb_mean": 0.28792387500000016,
+   "fixed": 45.99726048413431,
+   "adaptive_held_out": 46.38576935630426,
+   "per_task_held_out": 46.510590885055194,
+   "per_task_upper_bound": 48.343834473933455,
+   "adaptive_memory_vs_fixed": 0.9199985369396688,
+   "adaptive_gain_sd": 0.5828095071597071,
+   "repeats": 20
+  },
+  "RDKV@0.9": {
+   "target": "0.9",
+   "records": 800,
+   "memory_gb_mean": 0.15805950000000013,
+   "fixed": 42.57780374679657,
+   "adaptive_held_out": 44.072304420618444,
+   "per_task_held_out": 44.24790451706525,
+   "per_task_upper_bound": 45.65584585211182,
+   "adaptive_memory_vs_fixed": 1.000907609159842,
+   "adaptive_gain_sd": 0.4674892496768577,
+   "repeats": 20
+  },
+  "RDKV@0.8": {
+   "target": "0.8",
+   "records": 800,
+   "memory_gb_mean": 0.2944934999999996,
+   "fixed": 46.920082811183775,
+   "adaptive_held_out": 46.93015714109475,
+   "per_task_held_out": 46.534339101082175,
+   "per_task_upper_bound": 48.124467962168545,
+   "adaptive_memory_vs_fixed": 0.9436767492321564,
+   "adaptive_gain_sd": 0.4842477911223462,
+   "repeats": 20
+  },
+  "SnapKV@0.9": {
+   "target": "0.9",
+   "records": 800,
+   "memory_gb_mean": 0.154232,
+   "fixed": 32.63658428576143,
+   "adaptive_held_out": 34.861799339161024,
+   "per_task_held_out": 34.897811199334775,
+   "per_task_upper_bound": 36.46597702461346,
+   "adaptive_memory_vs_fixed": 1.0004062062347627,
+   "adaptive_gain_sd": 0.4457203250912249,
+   "repeats": 20
+  },
+  "SnapKV@0.8": {
+   "target": "0.8",
+   "records": 800,
+   "memory_gb_mean": 0.28792387500000016,
+   "fixed": 38.42406234936724,
+   "adaptive_held_out": 38.21853046134081,
+   "per_task_held_out": 38.47964320043906,
+   "per_task_upper_bound": 39.90600783168179,
+   "adaptive_memory_vs_fixed": 0.9824399765389384,
+   "adaptive_gain_sd": 0.4685941945438024,
+   "repeats": 20
+  },
+  "TriAttention@0.9": {
+   "target": "0.9",
+   "records": 800,
+   "memory_gb_mean": 0.154232,
+   "fixed": 33.10053867266641,
+   "adaptive_held_out": 36.27991465154052,
+   "per_task_held_out": 36.67135583567461,
+   "per_task_upper_bound": 37.82606369961179,
+   "adaptive_memory_vs_fixed": 0.9978330939753097,
+   "adaptive_gain_sd": 0.366825606816518,
+   "repeats": 20
+  },
+  "TriAttention@0.8": {
+   "target": "0.8",
+   "records": 800,
+   "memory_gb_mean": 0.28792387500000016,
+   "fixed": 37.793811710636014,
+   "adaptive_held_out": 37.25368908564523,
+   "per_task_held_out": 37.71282754817096,
+   "per_task_upper_bound": 39.341721992699604,
+   "adaptive_memory_vs_fixed": 0.9213831260085678,
+   "adaptive_gain_sd": 0.43096109983065045,
+   "repeats": 20
+  },
+  "RestoreKV with quantization@restorekv_4bit@0.95": {
+   "target": "restorekv_4bit@0.95",
+   "records": 800,
+   "memory_gb_mean": 0.08739675000000004,
+   "fixed": 46.62802530548248,
+   "adaptive_held_out": 47.0326543935608,
+   "per_task_held_out": 46.91027454570938,
+   "per_task_upper_bound": 48.35126643239556,
+   "adaptive_memory_vs_fixed": 1.0000317517527826,
+   "adaptive_gain_sd": 0.5015926252866166,
+   "repeats": 20
+  },
+  "RestoreKV with quantization@restorekv_4bit@0.9": {
+   "target": "restorekv_4bit@0.9",
+   "records": 800,
+   "memory_gb_mean": 0.154232,
+   "fixed": 47.33834907656681,
+   "adaptive_held_out": 46.81721923512243,
+   "per_task_held_out": 46.62172553715786,
+   "per_task_upper_bound": 49.21579807021525,
+   "adaptive_memory_vs_fixed": 0.9748285051091862,
+   "adaptive_gain_sd": 0.48284052382402026,
+   "repeats": 20
+  },
+  "TurboQuant (MSE)@turboquant_mse_3bit@0.0": {
+   "target": "turboquant_mse_3bit@0.0",
+   "records": 800,
+   "memory_gb_mean": 0.28265261499999994,
+   "fixed": 47.90030005702995,
+   "adaptive_held_out": 47.06117385813736,
+   "per_task_held_out": 47.38422110608074,
+   "per_task_upper_bound": 48.827896909331564,
+   "adaptive_memory_vs_fixed": 1.0005124357773942,
+   "adaptive_gain_sd": 0.3921340569734827,
+   "repeats": 20
+  },
+  "ResidualKV@0.9": {
+   "target": "0.9",
+   "records": 800,
+   "memory_gb_mean": 0.4014808749999997,
+   "fixed": 47.590559211050234,
+   "adaptive_held_out": 47.75413950425673,
+   "per_task_held_out": 47.81317512775533,
+   "per_task_upper_bound": 48.21237850805958,
+   "adaptive_memory_vs_fixed": 1.000356414860359,
+   "adaptive_gain_sd": 0.12116717628071204,
+   "repeats": 20
+  }
  }
 }

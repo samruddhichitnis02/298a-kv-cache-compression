@@ -15,13 +15,22 @@ total memory held at or below that of one fixed ratio. Two numbers are reported:
     and scored on the other, and the two directions are averaged.
 The allocation uses the task label, which a deployed system does not have, so both numbers bound
 what a label-free rule can reach.
+
+Part 3, the rule without the task label (harness/adaptive.py). Prompts are grouped into content types
+from the prompt text alone, and each type gets one setting at the same average memory. Held-out
+numbers are the mean over 20 random splits. This part also covers the families where the choice is
+the bit-width or the method variant rather than the keep ratio.
 """
 
 import json
+import sys
 from collections import defaultdict
 from pathlib import Path
 
 from compare_methods import BASELINE, CATEGORIES, REPO, load
+
+sys.path.insert(0, str(REPO / "harness"))
+import adaptive  # noqa: E402
 
 OUT = Path(__file__).resolve().parent
 RATIOS = ["0.75", "0.8", "0.9", "0.95"]
@@ -37,6 +46,35 @@ METHODS = {
 }
 BUDGET_METHODS = ["restorekv", "kvzip", "rdkv", "snapkv", "triattention"]  # run at all four ratios
 UNIT = 0.02  # GB step of the allocation table
+REPEATS = 20
+DATA = REPO / "data" / "processed_longbench" / "processed_longbench_dev.jsonl"
+
+
+def result(folder, tag, ratio):
+    return REPO / folder / f"Llama-3.1-8B-Instruct_{tag}_{ratio}.jsonl"
+
+
+def ratios(folder, tag):
+    return [result(folder, tag, r) for r in RATIOS]
+
+
+RESTOREKV = "results/restorekv/longbench"
+TURBOQUANT = "members/vedant/results/sem1/fixed"
+# label, what the rule chooses between, result files, the fixed settings whose memory is the budget
+RULE_FAMILIES = [
+    ("RestoreKV", "keep ratio", ratios(RESTOREKV, "restorekv"), ["0.9", "0.8"]),
+    ("KVzip", "keep ratio", ratios(RESTOREKV, "kvzip"), ["0.9", "0.8"]),
+    ("RDKV", "bit budget", ratios("results/rdkv/longbench", "rdkv"), ["0.9", "0.8"]),
+    ("SnapKV", "keep ratio", ratios(RESTOREKV, "snapkv"), ["0.9", "0.8"]),
+    ("TriAttention", "keep ratio", ratios("results/triattention/longbench", "triattention"), ["0.9", "0.8"]),
+    ("RestoreKV with quantization", "keep ratio and bit-width (16, 4 or 2)",
+     ratios(RESTOREKV, "restorekv") + [result(RESTOREKV, f"restorekv_{b}bit", r) for b in (4, 2) for r in ("0.9", "0.95")],
+     ["restorekv_4bit@0.95", "restorekv_4bit@0.9"]),
+    ("TurboQuant (MSE)", "bit setting (2.5, 3, 3.5 or 4)",
+     [result(TURBOQUANT, f"turboquant_mse_{b}bit", "0.0") for b in ("2.5", "3", "3.5", "4")],
+     ["turboquant_mse_3bit@0.0"]),
+    ("ResidualKV", "rebuild ratio", ratios("results/residualkv/longbench", "residualkv"), ["0.9"]),
+]
 
 
 def memory(row):
@@ -181,15 +219,40 @@ def main():
         for task in tasks:
             cells = [part2[f"{m}@0.9"]["choice"][task] for m in BUDGET_METHODS if f"{m}@0.9" in part2]
             md.append(f"| {task} ({category}) | " + " | ".join(cells) + " |")
+    md += ["", "## Part 3. The rule without the task label", "",
+           f"Prompts are grouped into {adaptive.CLUSTERS} content types from the prompt text alone (length and text "
+           "statistics), and each type gets one setting, with average memory equal to the fixed setting's. "
+           f"\"Adaptive\" is scored on records the rule was not fitted on, averaged over {REPEATS} random splits; "
+           "the ± is the spread of the gain across those splits. \"Per task\" is the same test with the task label known.", "",
+           "| Method | The rule chooses | Memory | Fixed | Adaptive, no task label | Per task, held out | Per task, upper bound |",
+           "|---|---|---|---|---|---|---|"]
+    part3 = {}
+    records = adaptive.read_records(DATA) if DATA.exists() else None
+    if records is None:
+        md += [f"| (not computed: {DATA.relative_to(REPO)} is not present; the prompt text is needed) | | | | | | |"]
+    else:
+        for label, chooses, files, targets in RULE_FAMILIES:
+            if not all(f.exists() for f in files):
+                continue
+            family = adaptive.load_runs(files)
+            for target in targets:
+                r = adaptive.evaluate(family, records, target, repeats=REPEATS)
+                gain = r["adaptive_held_out"] - r["fixed"]
+                part3[f"{label}@{target}"] = r
+                md.append(f"| {label} | {chooses} | {100 * r['memory_gb_mean'] * len(ids) / full_gb:.1f}% | {r['fixed']:.2f} | "
+                          f"{r['adaptive_held_out']:.2f} ({gain:+.2f} ± {r['adaptive_gain_sd']:.2f}) | "
+                          f"{r['per_task_held_out']:.2f} | {r['per_task_upper_bound']:.2f} |")
     md += ["", "## Limits", "",
-           "- The allocation uses the task label. A deployed system needs a rule that works from the prompt alone.",
+           "- Part 2 uses the task label. Part 3 does not, but its number of content types was chosen on these "
+           "validation results, where gains level off between 16 and 32 types.",
            "- Memory is the computed cache size (document plus uncompressed question), not measured GPU memory.",
-           "- ResidualKV and TurboQuant are left out: their memory does not line up with the four ratios.",
+           "- ResidualKV and TurboQuant are in Part 3 only: their memory does not line up with the four ratios.",
            "- TriAttention uses the Nov 10 calibration, which likely understates the method.", ""]
 
     (OUT / "TASK_ADAPTIVE.md").write_text("\n".join(md), encoding="utf-8")
     json.dump({"full_cache": {"score": full_score, "categories": full_cat}, "by_task_type": part1,
-               "by_task_budget": part2}, open(OUT / "task_adaptive.json", "w"), indent=1)
+               "by_task_budget": part2, "rule_without_task_label": part3},
+              open(OUT / "task_adaptive.json", "w"), indent=1)
     print("\n".join(md))
 
 

@@ -89,3 +89,27 @@ def test_needle_documents_hold_their_answers_and_hit_the_length():
         assert example["context"].count("special magic number") >= n_needles
     many = needles.make_example("many", 1, 2000, documents, tokenizer, seed=0)
     assert len({q["answers"][0] for q in many["questions"]}) == 16
+
+
+def test_runs_that_mix_presses_get_named_settings(tmp_path):
+    import json
+    files = []
+    for press, ratio in (("restorekv", 0.95), ("restorekv_4bit", 0.95), ("restorekv", 0.9)):
+        path = tmp_path / f"{press}_{ratio}.jsonl"
+        path.write_text(json.dumps({"record_id": "a", "task": "t", "press": press, "compression_ratio": ratio,
+                                    "score": 0.5, "kv_cache_gb": 0.1}) + "\n")
+        files.append(path)
+    mixed = adaptive.load_runs(files)
+    assert sorted(mixed) == ["restorekv@0.9", "restorekv@0.95", "restorekv_4bit@0.95"]
+    assert adaptive.find_setting(mixed, "restorekv_4bit@0.95") == "restorekv_4bit@0.95"
+    one_press = adaptive.load_runs([files[0], files[2]])
+    assert sorted(one_press) == ["0.9", "0.95"]
+    assert adaptive.find_setting(one_press, "0.9") == "0.9"
+
+
+def test_allocation_keeps_the_fixed_setting_when_it_is_the_only_one_that_fits():
+    tables = {"small": {"g1": (10.0, 1.0), "g2": (10.0, 1.0)}, "large": {"g1": (20.0, 5.0), "g2": (20.0, 5.0)}}
+    assert adaptive.allocate(tables, 2.0, "small") == {"g1": "small", "g2": "small"}
+    # equal memory, different scores: the better one wins without exceeding the budget
+    same = {"plain": {"g1": (10.0, 1.0)}, "quantized": {"g1": (30.0, 1.0)}}
+    assert adaptive.allocate(same, 1.0, "plain") == {"g1": "quantized"}

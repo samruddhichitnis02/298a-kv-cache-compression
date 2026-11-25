@@ -78,17 +78,19 @@ python harness/run_longbench.py --press rdkv --adaptive-policy results/rdkv/adap
 
 `evaluate` is exact, not an estimate: decoding is greedy, so the adaptive score is a lookup of each record's existing result at its chosen ratio. It splits each task in half, fits on one half and scores the other.
 
-What it gives on the committed validation results, at the memory of ratio 0.9:
+What it gives on the committed validation results (mean over 20 random splits, `--repeats 20`; the ± is the spread of the gain):
 
-| Method | Fixed | Adaptive, no task label | Per task, held out | Per task, upper bound |
+| Method | Memory | Fixed | Adaptive, no task label | Per task, held out |
 |---|---|---|---|---|
-| RestoreKV | 43.29 | 44.04 | 45.78 | 46.85 |
-| KVzip | 41.61 | 41.34 | 45.17 | 45.88 |
-| RDKV | 42.58 | 42.44 | 43.82 | 45.61 |
-| SnapKV | 32.64 | 33.47 | 34.74 | 36.47 |
-| TriAttention | 33.10 | 36.05 | 36.95 | 37.83 |
+| RestoreKV | 11.4% | 43.29 | 45.32 (+2.02 ± 0.58) | 45.32 |
+| KVzip | 11.4% | 41.61 | 44.32 (+2.71 ± 0.66) | 44.50 |
+| RDKV | 11.6% | 42.58 | 44.07 (+1.49 ± 0.47) | 44.25 |
+| SnapKV | 11.4% | 32.64 | 34.86 (+2.23 ± 0.45) | 34.90 |
+| TriAttention | 11.4% | 33.10 | 36.28 (+3.18 ± 0.37) | 36.67 |
 
-Without the task label the gain is small and not reliable yet (between -0.3 and +3.0 points). Knowing the task is worth more than the text statistics capture. `--signal` is the place to add your method's own per-record number (for example how concentrated its importance scores are): a JSON file mapping `record_id` to a number or list.
+At about 11% memory the rule gains 1.5 to 3.2 points without the task label, as much as knowing the task. Where a fixed setting is already within about a point of the full cache (4-bit RestoreKV, TurboQuant, ResidualKV, and every method at about 21% memory) it gains nothing. The full table is in `results/comparison/TASK_ADAPTIVE.md`.
+
+Result files that mix presses or bit-widths work too: settings are then named `<press>@<ratio>`, for example `--target restorekv_4bit@0.95`, and the rule chooses the strategy as well as the budget. The number of content types (`--clusters`, default 24) was chosen on these validation results. `--signal` is the place to add your method's own per-record number: a JSON file mapping `record_id` to a number or list.
 
 ## Point 3: serving measurements
 
@@ -148,4 +150,4 @@ ResidualKV runs on the authors' code, so it has its own runner for the needle do
 - Not yet run on a GPU or on Llama-3.1-8B. Timing uses a GPU synchronize call that the laptop tests never exercise on CUDA.
 - Whether a 64K document fits on a 32 GB card, even with chunked prefill, is untested. The full cache alone is about 8 GB at 64K and 16 GB at 128K, on top of the 16 GB model.
 - ResidualKV's real packed size is still its owner's to measure; its runner reports the size of the tensors its cache holds.
-- The adaptive rule is a first version; see the table above.
+- The adaptive rule's number of content types was chosen on validation results; fitting on the training sample is the cleaner test and needs GPU runs.

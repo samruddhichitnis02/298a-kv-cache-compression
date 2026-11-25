@@ -44,9 +44,40 @@ Each task was allowed its own ratio of the same method, with total memory held a
 - **At about 21% memory the gain disappears.** Held-out changes range from -0.5 to +1.0 points, because every method is already close to the full cache there.
 - **The allocation is consistent across methods.** Passage retrieval gets the most or second-most memory under every method. NarrativeQA, QMSum and TriviaQA get the least under every method.
 
+## Finding 3: the task label is not needed
+
+A deployed system does not know the task. The rule in `harness/adaptive.py` uses only the prompt: its length and a few text statistics (how compressible the text is, the share of digits, symbols and line breaks, and so on). It groups prompts into 24 content types and gives each type one setting, with the average memory equal to a fixed setting's. It is scored on records it was not fitted on, averaged over 20 random splits.
+
+| Method | Memory | Fixed | Adaptive, no task label | Per task, held out |
+|---|---|---|---|---|
+| RestoreKV | 11.4% | 43.29 | 45.32 (+2.02 ± 0.58) | 45.32 |
+| KVzip | 11.4% | 41.61 | 44.32 (+2.71 ± 0.66) | 44.50 |
+| RDKV | 11.6% | 42.58 | 44.07 (+1.49 ± 0.47) | 44.25 |
+| SnapKV | 11.4% | 32.64 | 34.86 (+2.23 ± 0.45) | 34.90 |
+| TriAttention | 11.4% | 33.10 | 36.28 (+3.18 ± 0.37) | 36.67 |
+
+- **At about 11% memory the rule gains 1.5 to 3.2 points for all five methods,** at the same average memory.
+- **It does as well as knowing the task.** The last two columns differ by at most 0.4 points. The prompt text carries enough to tell the content types apart.
+- **The gain is at least three times its spread across splits,** so it is not an accident of one split.
+
+## Finding 4: adapting helps only where a fixed setting loses
+
+| Method | The rule chooses | Memory | Fixed | Adaptive, no task label | Full cache |
+|---|---|---|---|---|---|
+| RestoreKV with quantization | keep ratio and bit-width | 6.4% | 46.63 | 47.03 (+0.40 ± 0.50) | 47.72 |
+| RestoreKV with quantization | keep ratio and bit-width | 11.4% | 47.34 | 46.82 (-0.52 ± 0.48) | 47.72 |
+| TurboQuant (MSE) | bit setting | 20.8% | 47.90 | 47.06 (-0.84 ± 0.39) | 47.72 |
+| ResidualKV | rebuild ratio | 29.6% | 47.59 | 47.75 (+0.16 ± 0.12) | 47.72 |
+| RestoreKV, KVzip, RDKV, SnapKV, TriAttention | keep ratio | about 21% | 37.79 to 47.63 | -0.54 to +0.39 | 47.72 |
+
+- **When a fixed setting is already within about a point of the full cache, adapting gains nothing,** and can lose up to a point because the rule is fitted on a few hundred records. That covers 4-bit RestoreKV, TurboQuant and ResidualKV at every memory level we ran.
+- **At about 21% memory no method gains reliably.** RestoreKV, KVzip and RDKV are already close to the full cache there. SnapKV and TriAttention are not, but adapting does not help them there either; we have not found out why.
+- **So the two ideas substitute for each other.** Adaptive budgets recover 2 to 3 points for eviction at 11% memory. Adding 4-bit quantization recovers 4 points at the same memory with one fixed setting, and leaves nothing for adaptivity to add.
+
 ## Limits
 
-- The allocation uses the task label, which a deployed system does not have. These numbers bound what a rule that reads only the prompt can reach; that rule is the next step.
+- The per-task results in Finding 2 use the task label. Finding 3 does not, but the number of content types (24) was chosen on these same validation results, where gains level off between 16 and 32 types. A cleaner test fits the rule on the 300-record training sample and scores it on all 800 records; that needs GPU runs of the training sample.
+- Finding 2 uses one split and Findings 3 and 4 use 20, so their held-out per-task numbers differ slightly.
+- The rule uses text statistics only. A signal from the method itself, such as how concentrated its importance scores are, has not been tried.
 - Memory is computed, not measured on the GPU.
-- ResidualKV and TurboQuant are not included, because their memory does not line up with the four ratios.
 - TriAttention uses the Nov 10 calibration, which likely understates the method.
