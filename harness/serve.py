@@ -340,12 +340,21 @@ def answer(pipe, cache, question_ids, context_length, max_new_tokens):
     sync(device)
     end = time.perf_counter()
 
-    for layer, length in zip(cache.layers, lengths):
-        layer.crop(length)
+    forget_answer(cache, lengths)
     text = str(pipe.tokenizer.decode(torch.stack(generated), skip_special_tokens=True))
     decoded = len(generated) - 1
     return text, {"first_token_s": first - start, "decode_s": end - first, "new_tokens": len(generated),
                   "tokens_per_s": decoded / (end - first) if decoded and end > first else None}
+
+
+def forget_answer(cache, lengths):
+    """Drop the question and answer tokens again, as the kvpress pipeline does between questions."""
+    for layer, length in zip(cache.layers, lengths):
+        if isinstance(layer, PackedLayer):
+            layer.crop(length)
+        else:
+            layer.keys = layer.keys[:, :, :length]
+            layer.values = layer.values[:, :, :length]
 
 
 def tokenize(pipe, context, questions, answer_prefix=""):
