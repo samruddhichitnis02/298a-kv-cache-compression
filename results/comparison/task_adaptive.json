@@ -1,0 +1,539 @@
+{
+ "full_cache": {
+  "score": 47.71564846820976,
+  "categories": {
+   "Single-doc QA": 43.98347388366369,
+   "Multi-doc QA": 41.58310811995022,
+   "Summarization": 28.65047519353023,
+   "Few-shot": 70.83777002402637,
+   "Synthetic": 52.25,
+   "Code": 51.892946913922266
+  }
+ },
+ "by_task_type": {
+  "0.95": {
+   "memory_pct": {
+    "restorekv_4bit": 6.438412526051124,
+    "restorekv_2bit": 6.438412526051124,
+    "restorekv": 6.438412526051124,
+    "kvzip": 6.438412526051124,
+    "rdkv": 6.598375087573769,
+    "snapkv": 6.438412526051124,
+    "triattention": 6.438412526051124
+   },
+   "drops": {
+    "restorekv_4bit": {
+     "Single-doc QA": 3.519216696211764,
+     "Multi-doc QA": -1.6237096237096225,
+     "Summarization": 0.5064290345108127,
+     "Few-shot": -3.5636617242446675,
+     "Synthetic": -7.75,
+     "Code": 0.7916031240293577
+    },
+    "restorekv_2bit": {
+     "Single-doc QA": -4.07647866027412,
+     "Multi-doc QA": -7.086186523028623,
+     "Summarization": -0.1662616353210815,
+     "Few-shot": -3.7826370765546926,
+     "Synthetic": -2.0,
+     "Code": 2.99606431733708
+    },
+    "restorekv": {
+     "Single-doc QA": -6.753309719432046,
+     "Multi-doc QA": -9.886196143038244,
+     "Summarization": -2.7035901132035605,
+     "Few-shot": -10.618803259412338,
+     "Synthetic": -43.25,
+     "Code": -4.481240067872143
+    },
+    "kvzip": {
+     "Single-doc QA": -15.036880084239083,
+     "Multi-doc QA": -16.690527308948354,
+     "Summarization": -12.561344187659962,
+     "Few-shot": -22.937064785038267,
+     "Synthetic": -45.25,
+     "Code": -9.104188356830136
+    },
+    "rdkv": {
+     "Single-doc QA": -16.49681210211934,
+     "Multi-doc QA": -12.173264695400913,
+     "Summarization": -5.2091156903601785,
+     "Few-shot": -3.224090114460523,
+     "Synthetic": -19.583333333333336,
+     "Code": -2.259823864857168
+    },
+    "snapkv": {
+     "Single-doc QA": -26.588987594822914,
+     "Multi-doc QA": -24.54632701544129,
+     "Summarization": -10.4003479313685,
+     "Few-shot": -14.381343262372312,
+     "Synthetic": -46.25,
+     "Code": -3.7161162412344666
+    },
+    "triattention": {
+     "Single-doc QA": -25.850440874179395,
+     "Multi-doc QA": -16.58480378149243,
+     "Summarization": -7.2748568446528346,
+     "Few-shot": -13.355497297431597,
+     "Synthetic": -31.5625,
+     "Code": -4.299307403511413
+    }
+   },
+   "best": {
+    "Single-doc QA": "restorekv_4bit",
+    "Multi-doc QA": "restorekv_4bit",
+    "Summarization": "restorekv_4bit",
+    "Few-shot": "rdkv",
+    "Synthetic": "restorekv_2bit",
+    "Code": "restorekv_2bit"
+   }
+  },
+  "0.9": {
+   "memory_pct": {
+    "restorekv_4bit": 11.362084296245762,
+    "restorekv_2bit": 11.362084296245762,
+    "restorekv": 11.362084296245762,
+    "kvzip": 11.362084296245762,
+    "rdkv": 11.64405157699088,
+    "snapkv": 11.362084296245762,
+    "triattention": 11.362084296245762
+   },
+   "drops": {
+    "restorekv_4bit": {
+     "Single-doc QA": -0.639256657924399,
+     "Multi-doc QA": -0.9690524493728176,
+     "Summarization": 0.326361987696302,
+     "Few-shot": -0.9454927677860496,
+     "Synthetic": -2.1875,
+     "Code": 2.51026469793689
+    },
+    "restorekv_2bit": {
+     "Single-doc QA": -4.837792904658784,
+     "Multi-doc QA": -6.085204063222633,
+     "Summarization": -0.7138659810716419,
+     "Few-shot": -2.9005063668658835,
+     "Synthetic": -3.6590909090909065,
+     "Code": 1.3071547242819435
+    },
+    "restorekv": {
+     "Single-doc QA": 0.3470974255327164,
+     "Multi-doc QA": -4.807041171953443,
+     "Summarization": -0.3934124261801415,
+     "Few-shot": -3.9912071261639426,
+     "Synthetic": -22.25,
+     "Code": 0.13731066933572578
+    },
+    "kvzip": {
+     "Single-doc QA": -4.127086287481724,
+     "Multi-doc QA": -2.2156188727508237,
+     "Summarization": -1.4056972594956711,
+     "Few-shot": -8.930393813712605,
+     "Synthetic": -23.75,
+     "Code": -0.08553709776975893
+    },
+    "rdkv": {
+     "Single-doc QA": -10.24883123555663,
+     "Multi-doc QA": -5.714526701368797,
+     "Summarization": -3.2790775972443313,
+     "Few-shot": -0.8797367941084815,
+     "Synthetic": -11.707142857142856,
+     "Code": 0.7876435782547944
+    },
+    "snapkv": {
+     "Single-doc QA": -22.363645640966695,
+     "Multi-doc QA": -18.573711891823343,
+     "Summarization": -7.547269628805939,
+     "Few-shot": -8.328175048852266,
+     "Synthetic": -33.1875,
+     "Code": -2.2258101439142806
+    },
+    "triattention": {
+     "Single-doc QA": -24.406571041068336,
+     "Multi-doc QA": -16.853145959647502,
+     "Summarization": -5.948271025312042,
+     "Few-shot": -11.303133779965897,
+     "Synthetic": -23.183333333333334,
+     "Code": -5.970862322022867
+    }
+   },
+   "best": {
+    "Single-doc QA": "restorekv",
+    "Multi-doc QA": "restorekv_4bit",
+    "Summarization": "restorekv_4bit",
+    "Few-shot": "rdkv",
+    "Synthetic": "restorekv_4bit",
+    "Code": "restorekv_4bit"
+   }
+  },
+  "0.8": {
+   "memory_pct": {
+    "restorekv": 21.2110025069488,
+    "kvzip": 21.2110025069488,
+    "rdkv": 21.694978809173527,
+    "snapkv": 21.2110025069488,
+    "triattention": 21.2110025069488
+   },
+   "drops": {
+    "restorekv": {
+     "Single-doc QA": 2.633274084172939,
+     "Multi-doc QA": -0.9635314003735047,
+     "Summarization": 0.41745633933383175,
+     "Few-shot": -2.5448735930757778,
+     "Synthetic": -3.25,
+     "Code": 3.229339140966651
+    },
+    "kvzip": {
+     "Single-doc QA": -0.3896495673584184,
+     "Multi-doc QA": -1.6417420785841799,
+     "Summarization": 0.02832802374405219,
+     "Few-shot": -4.3785582647523995,
+     "Synthetic": -6.487499999999997,
+     "Code": 2.3128289578227523
+    },
+    "rdkv": {
+     "Single-doc QA": -4.870266058344249,
+     "Multi-doc QA": 1.8632071632071714,
+     "Summarization": -0.9288898505758034,
+     "Few-shot": -0.9364375678559753,
+     "Synthetic": -1.6833333333333371,
+     "Code": 2.6273875474788326
+    },
+    "snapkv": {
+     "Single-doc QA": -15.66825461488094,
+     "Multi-doc QA": -9.55131474992156,
+     "Summarization": -5.206079477489546,
+     "Few-shot": -5.287911296398775,
+     "Synthetic": -21.104166666666668,
+     "Code": 0.3418179239627577
+    },
+    "triattention": {
+     "Single-doc QA": -18.46877098573331,
+     "Multi-doc QA": -14.513331680608562,
+     "Summarization": -3.9682196474310736,
+     "Few-shot": -9.704454132456839,
+     "Synthetic": -7.4715909090909065,
+     "Code": -1.9209384821543765
+    }
+   },
+   "best": {
+    "Single-doc QA": "restorekv",
+    "Multi-doc QA": "rdkv",
+    "Summarization": "restorekv",
+    "Few-shot": "rdkv",
+    "Synthetic": "rdkv",
+    "Code": "restorekv"
+   }
+  },
+  "0.75": {
+   "memory_pct": {
+    "restorekv": 26.135457008001165,
+    "kvzip": 26.135457008001165,
+    "rdkv": 26.693387563382778,
+    "snapkv": 26.135457008001165,
+    "triattention": 26.135457008001165
+   },
+   "drops": {
+    "restorekv": {
+     "Single-doc QA": 0.40892945539570036,
+     "Multi-doc QA": -1.7219729588150585,
+     "Summarization": 0.2152175313457647,
+     "Few-shot": -3.040344092065183,
+     "Synthetic": -0.9166666666666643,
+     "Code": 3.839422047497891
+    },
+    "kvzip": {
+     "Single-doc QA": 0.7697113939679809,
+     "Multi-doc QA": -0.9733947396486045,
+     "Summarization": 0.001858711160661386,
+     "Few-shot": -3.167498878986109,
+     "Synthetic": -0.2875000000000014,
+     "Code": 3.0617136007661756
+    },
+    "rdkv": {
+     "Single-doc QA": -3.3142488071439686,
+     "Multi-doc QA": 0.23548821548821763,
+     "Summarization": -0.7691007577718878,
+     "Few-shot": -0.27093212748235374,
+     "Synthetic": 0.14999999999999858,
+     "Code": 1.591174542143584
+    },
+    "snapkv": {
+     "Single-doc QA": -15.499133381928374,
+     "Multi-doc QA": -9.51639335323545,
+     "Summarization": -4.245850548652555,
+     "Few-shot": -4.662839328640587,
+     "Synthetic": -16.90972222222222,
+     "Code": 1.3083410089751268
+    },
+    "triattention": {
+     "Single-doc QA": -16.71987002843528,
+     "Multi-doc QA": -13.756558938137879,
+     "Summarization": -3.062170030599024,
+     "Few-shot": -9.08547933961696,
+     "Synthetic": -7.0340909090909065,
+     "Code": -0.8038888808173539
+    }
+   },
+   "best": {
+    "Single-doc QA": "kvzip",
+    "Multi-doc QA": "rdkv",
+    "Summarization": "restorekv",
+    "Few-shot": "rdkv",
+    "Synthetic": "rdkv",
+    "Code": "restorekv"
+   }
+  }
+ },
+ "by_task_budget": {
+  "restorekv@0.9": {
+   "budget_pct": 11.362084296245762,
+   "fixed": 43.293206683358314,
+   "held_out": 45.78254711203269,
+   "upper_bound": 46.885912456177536,
+   "held_out_memory_vs_fixed_pct": 99.65619975102442,
+   "choice": {
+    "2wikimqa": "0.8",
+    "gov_report": "0.9",
+    "hotpotqa": "0.9",
+    "lcc": "0.8",
+    "multi_news": "0.9",
+    "multifieldqa_en": "0.9",
+    "musique": "0.95",
+    "narrativeqa": "0.95",
+    "passage_count": "0.9",
+    "passage_retrieval_en": "0.75",
+    "qasper": "0.9",
+    "qmsum": "0.95",
+    "repobench-p": "0.95",
+    "samsum": "0.9",
+    "trec": "0.8",
+    "triviaqa": "0.95"
+   }
+  },
+  "restorekv@0.8": {
+   "budget_pct": 21.2110025069488,
+   "fixed": 47.62725187896636,
+   "held_out": 47.828457703198374,
+   "upper_bound": 48.89063521285075,
+   "held_out_memory_vs_fixed_pct": 90.38053027037094,
+   "choice": {
+    "2wikimqa": "0.75",
+    "gov_report": "0.75",
+    "hotpotqa": "0.8",
+    "lcc": "0.75",
+    "multi_news": "0.8",
+    "multifieldqa_en": "0.9",
+    "musique": "0.8",
+    "narrativeqa": "0.8",
+    "passage_count": "0.9",
+    "passage_retrieval_en": "0.75",
+    "qasper": "0.9",
+    "qmsum": "0.8",
+    "repobench-p": "0.95",
+    "samsum": "0.8",
+    "trec": "0.8",
+    "triviaqa": "0.95"
+   }
+  },
+  "kvzip@0.9": {
+   "budget_pct": 11.362084296245762,
+   "fixed": 41.60893203721837,
+   "held_out": 45.033792665765205,
+   "upper_bound": 45.88168404811882,
+   "held_out_memory_vs_fixed_pct": 99.41346478033093,
+   "choice": {
+    "2wikimqa": "0.8",
+    "gov_report": "0.9",
+    "hotpotqa": "0.9",
+    "lcc": "0.75",
+    "multi_news": "0.9",
+    "multifieldqa_en": "0.9",
+    "musique": "0.9",
+    "narrativeqa": "0.95",
+    "passage_count": "0.95",
+    "passage_retrieval_en": "0.75",
+    "qasper": "0.9",
+    "qmsum": "0.95",
+    "repobench-p": "0.95",
+    "samsum": "0.95",
+    "trec": "0.8",
+    "triviaqa": "0.95"
+   }
+  },
+  "kvzip@0.8": {
+   "budget_pct": 21.2110025069488,
+   "fixed": 45.9972604841343,
+   "held_out": 47.01559505153349,
+   "upper_bound": 48.343834473933455,
+   "held_out_memory_vs_fixed_pct": 93.04603517162305,
+   "choice": {
+    "2wikimqa": "0.8",
+    "gov_report": "0.75",
+    "hotpotqa": "0.75",
+    "lcc": "0.75",
+    "multi_news": "0.8",
+    "multifieldqa_en": "0.75",
+    "musique": "0.9",
+    "narrativeqa": "0.8",
+    "passage_count": "0.75",
+    "passage_retrieval_en": "0.75",
+    "qasper": "0.75",
+    "qmsum": "0.8",
+    "repobench-p": "0.95",
+    "samsum": "0.75",
+    "trec": "0.8",
+    "triviaqa": "0.9"
+   }
+  },
+  "rdkv@0.9": {
+   "budget_pct": 11.64405157699088,
+   "fixed": 42.577803746796576,
+   "held_out": 43.81845776317326,
+   "upper_bound": 45.65584585211181,
+   "held_out_memory_vs_fixed_pct": 100.86059363720626,
+   "choice": {
+    "2wikimqa": "0.8",
+    "gov_report": "0.95",
+    "hotpotqa": "0.95",
+    "lcc": "0.9",
+    "multi_news": "0.8",
+    "multifieldqa_en": "0.75",
+    "musique": "0.9",
+    "narrativeqa": "0.95",
+    "passage_count": "0.95",
+    "passage_retrieval_en": "0.75",
+    "qasper": "0.75",
+    "qmsum": "0.95",
+    "repobench-p": "0.9",
+    "samsum": "0.95",
+    "trec": "0.9",
+    "triviaqa": "0.95"
+   }
+  },
+  "rdkv@0.8": {
+   "budget_pct": 21.694978809173527,
+   "fixed": 46.92008281118378,
+   "held_out": 46.37585060140884,
+   "upper_bound": 48.124467962168524,
+   "held_out_memory_vs_fixed_pct": 96.20776859251559,
+   "choice": {
+    "2wikimqa": "0.8",
+    "gov_report": "0.75",
+    "hotpotqa": "0.8",
+    "lcc": "0.9",
+    "multi_news": "0.75",
+    "multifieldqa_en": "0.75",
+    "musique": "0.8",
+    "narrativeqa": "0.75",
+    "passage_count": "0.95",
+    "passage_retrieval_en": "0.75",
+    "qasper": "0.75",
+    "qmsum": "0.8",
+    "repobench-p": "0.75",
+    "samsum": "0.9",
+    "trec": "0.75",
+    "triviaqa": "0.9"
+   }
+  },
+  "snapkv@0.9": {
+   "budget_pct": 11.362084296245762,
+   "fixed": 32.63658428576143,
+   "held_out": 34.740368547748886,
+   "upper_bound": 36.46597702461346,
+   "held_out_memory_vs_fixed_pct": 100.31891890139528,
+   "choice": {
+    "2wikimqa": "0.8",
+    "gov_report": "0.95",
+    "hotpotqa": "0.8",
+    "lcc": "0.75",
+    "multi_news": "0.9",
+    "multifieldqa_en": "0.95",
+    "musique": "0.95",
+    "narrativeqa": "0.95",
+    "passage_count": "0.9",
+    "passage_retrieval_en": "0.8",
+    "qasper": "0.8",
+    "qmsum": "0.95",
+    "repobench-p": "0.95",
+    "samsum": "0.95",
+    "trec": "0.8",
+    "triviaqa": "0.95"
+   }
+  },
+  "snapkv@0.8": {
+   "budget_pct": 21.2110025069488,
+   "fixed": 38.42406234936724,
+   "held_out": 37.987110162726964,
+   "upper_bound": 39.90600783168179,
+   "held_out_memory_vs_fixed_pct": 97.65471863005455,
+   "choice": {
+    "2wikimqa": "0.8",
+    "gov_report": "0.75",
+    "hotpotqa": "0.8",
+    "lcc": "0.75",
+    "multi_news": "0.75",
+    "multifieldqa_en": "0.75",
+    "musique": "0.75",
+    "narrativeqa": "0.8",
+    "passage_count": "0.9",
+    "passage_retrieval_en": "0.75",
+    "qasper": "0.8",
+    "qmsum": "0.75",
+    "repobench-p": "0.95",
+    "samsum": "0.8",
+    "trec": "0.75",
+    "triviaqa": "0.9"
+   }
+  },
+  "triattention@0.9": {
+   "budget_pct": 11.362084296245762,
+   "fixed": 33.100538672666396,
+   "held_out": 36.69758760969491,
+   "upper_bound": 37.82606369961179,
+   "held_out_memory_vs_fixed_pct": 100.1613640489652,
+   "choice": {
+    "2wikimqa": "0.9",
+    "gov_report": "0.9",
+    "hotpotqa": "0.95",
+    "lcc": "0.75",
+    "multi_news": "0.75",
+    "multifieldqa_en": "0.75",
+    "musique": "0.95",
+    "narrativeqa": "0.95",
+    "passage_count": "0.95",
+    "passage_retrieval_en": "0.8",
+    "qasper": "0.75",
+    "qmsum": "0.95",
+    "repobench-p": "0.95",
+    "samsum": "0.9",
+    "trec": "0.8",
+    "triviaqa": "0.95"
+   }
+  },
+  "triattention@0.8": {
+   "budget_pct": 21.2110025069488,
+   "fixed": 37.79381171063601,
+   "held_out": 37.276326024748386,
+   "upper_bound": 39.341721992699604,
+   "held_out_memory_vs_fixed_pct": 98.5126711009985,
+   "choice": {
+    "2wikimqa": "0.9",
+    "gov_report": "0.8",
+    "hotpotqa": "0.95",
+    "lcc": "0.75",
+    "multi_news": "0.75",
+    "multifieldqa_en": "0.75",
+    "musique": "0.75",
+    "narrativeqa": "0.8",
+    "passage_count": "0.75",
+    "passage_retrieval_en": "0.8",
+    "qasper": "0.75",
+    "qmsum": "0.75",
+    "repobench-p": "0.75",
+    "samsum": "0.75",
+    "trec": "0.8",
+    "triviaqa": "0.95"
+   }
+  }
+ }
+}
