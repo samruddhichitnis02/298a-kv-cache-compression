@@ -94,9 +94,30 @@ Ratio chosen for each task at the budget of fixed ratio 0.9 (upper-bound allocat
 | lcc (Code) | 0.8 | 0.75 | 0.9 | 0.75 | 0.75 |
 | repobench-p (Code) | 0.95 | 0.95 | 0.9 | 0.95 | 0.95 |
 
+## Part 3. The rule without the task label
+
+Prompts are grouped into 24 content types from the prompt text alone (length and text statistics), and each type gets one setting, with average memory equal to the fixed setting's. "Adaptive" is scored on records the rule was not fitted on, averaged over 20 random splits; the ± is the spread of the gain across those splits. "Per task" is the same test with the task label known.
+
+| Method | The rule chooses | Memory | Fixed | Adaptive, no task label | Per task, held out | Per task, upper bound |
+|---|---|---|---|---|---|---|
+| RestoreKV | keep ratio | 11.4% | 43.29 | 45.32 (+2.02 ± 0.58) | 45.32 | 46.91 |
+| RestoreKV | keep ratio | 21.2% | 47.63 | 47.20 (-0.43 ± 0.64) | 46.82 | 48.89 |
+| KVzip | keep ratio | 11.4% | 41.61 | 44.32 (+2.71 ± 0.66) | 44.50 | 45.88 |
+| KVzip | keep ratio | 21.2% | 46.00 | 46.39 (+0.39 ± 0.58) | 46.51 | 48.34 |
+| RDKV | bit budget | 11.6% | 42.58 | 44.07 (+1.49 ± 0.47) | 44.25 | 45.66 |
+| RDKV | bit budget | 21.7% | 46.92 | 46.93 (+0.01 ± 0.48) | 46.53 | 48.12 |
+| SnapKV | keep ratio | 11.4% | 32.64 | 34.86 (+2.23 ± 0.45) | 34.90 | 36.47 |
+| SnapKV | keep ratio | 21.2% | 38.42 | 38.22 (-0.21 ± 0.47) | 38.48 | 39.91 |
+| TriAttention | keep ratio | 11.4% | 33.10 | 36.28 (+3.18 ± 0.37) | 36.67 | 37.83 |
+| TriAttention | keep ratio | 21.2% | 37.79 | 37.25 (-0.54 ± 0.43) | 37.71 | 39.34 |
+| RestoreKV with quantization | keep ratio and bit-width (16, 4 or 2) | 6.4% | 46.63 | 47.03 (+0.40 ± 0.50) | 46.91 | 48.35 |
+| RestoreKV with quantization | keep ratio and bit-width (16, 4 or 2) | 11.4% | 47.34 | 46.82 (-0.52 ± 0.48) | 46.62 | 49.22 |
+| TurboQuant (MSE) | bit setting (2.5, 3, 3.5 or 4) | 20.8% | 47.90 | 47.06 (-0.84 ± 0.39) | 47.38 | 48.83 |
+| ResidualKV | rebuild ratio | 29.6% | 47.59 | 47.75 (+0.16 ± 0.12) | 47.81 | 48.21 |
+
 ## Limits
 
-- The allocation uses the task label. A deployed system needs a rule that works from the prompt alone.
+- Part 2 uses the task label. Part 3 does not, but its number of content types was chosen on these validation results, where gains level off between 16 and 32 types.
 - Memory is the computed cache size (document plus uncompressed question), not measured GPU memory.
-- ResidualKV and TurboQuant are left out: their memory does not line up with the four ratios.
+- ResidualKV and TurboQuant are in Part 3 only: their memory does not line up with the four ratios.
 - TriAttention uses the Nov 10 calibration, which likely understates the method.
