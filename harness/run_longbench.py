@@ -171,10 +171,15 @@ def code_commit():
     """Short hash of the checked-out commit, so a result file can be tied to the code that made it."""
     import subprocess
     try:
-        return subprocess.run(["git", "-C", str(REPO), "rev-parse", "--short", "HEAD"], capture_output=True,
-                              text=True, timeout=10).stdout.strip() or None
+        commit = subprocess.run(["git", "-C", str(REPO), "rev-parse", "--short", "HEAD"], capture_output=True,
+                                text=True, timeout=10).stdout.strip()
     except Exception:
-        return None
+        commit = ""
+    # A copy unpacked from a zip has no git history; the zip carries its version in CODE_VERSION instead.
+    version_file = REPO / "CODE_VERSION"
+    if not commit and version_file.exists():
+        commit = version_file.read_text().split()[0]
+    return commit or None
 
 
 def pick_device():
