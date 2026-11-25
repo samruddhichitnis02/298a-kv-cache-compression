@@ -14,6 +14,17 @@ All five run through one driver, `harness/serve.py`: prefill the document under 
 
 **Status.** Everything here was built and tested on a laptop (40 unit tests, and end-to-end runs on Qwen2.5-0.5B). Nothing has run on Llama-3.1-8B on a GPU yet. Do a short smoke run before a long one.
 
+## One command per point
+
+`harness/sprint/run_point.sh` runs a point across the methods in the shared harness:
+
+```bash
+bash harness/sprint/run_point.sh timing smoke     # a few short records first
+nohup bash harness/sprint/run_point.sh timing > timing.log 2>&1 &
+```
+
+Points: `hybrid` (point 1), `timing` (point 3), `many` and `long` (point 4). The sections below explain what each one runs and the flags behind it.
+
 ## Before you start
 
 ```bash
