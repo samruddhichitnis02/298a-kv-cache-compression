@@ -11,6 +11,14 @@ record; rerunning the same command skips records that are already there.
     # Full dev set (800 records) with RestoreKV keeping 10% of the cache
     python harness/run_longbench.py --press restorekv --compression-ratio 0.9
 
+    # Timing on the shared 100 records (time to first token, tokens per second, measured cache size)
+    python harness/run_longbench.py --press snapkv --compression-ratio 0.9 --timing --records harness/subsets/timing_100.json
+
+    # Hybrid at a real byte budget: evict with KVzip, store the rest packed at 4 bits, 10% of the full cache
+    python harness/run_longbench.py --press kvzip --pack-bits 4 --memory-budget 0.1
+
+See harness/TOOLS.md for the timing, packing, adaptive, many-question and long-document tools.
+
 The data is not in git; by default it is read from data/processed_longbench/
 at the repo root (unzip Samruddhi's processed_longbench.zip there).
 """
@@ -32,6 +40,7 @@ from transformers import pipeline
 import sys
 
 import longbench
+import serve
 from kvpress import KVzipPress, RestoreKVPress, SnapKVPress  # also registers the kv-press pipeline
 
 REPO = Path(__file__).resolve().parent.parent
@@ -89,9 +98,13 @@ def make_turboquant_press(name, layer_config=None):
     return TurboQuantPress(bits=float(match.group(2)), qjl_keys=match.group(1) is None)
 
 
-def make_press(name, compression_ratio, layer_config=None, triattention_stats=None):
+def make_press(name, compression_ratio, layer_config=None, triattention_stats=None, rdkv_packed=False,
+               rdkv_bitset=None):
     if name == "none":
         return None
+    if name == "rdkv" and (rdkv_packed or rdkv_bitset):
+        options = {"bitset": tuple(int(b) for b in rdkv_bitset.split(","))} if rdkv_bitset else {}
+        return RDKVPress(compression_ratio=compression_ratio, measure_packed=rdkv_packed, **options)
     if name == "triattention" and triattention_stats:
         return TriAttentionPress(compression_ratio=compression_ratio, stats_path=str(triattention_stats))
     if name in ("restorekv_4bit", "restorekv_2bit"):
@@ -154,6 +167,21 @@ def kv_cache_gb(pipe, context, question, ratio, press=None, answer_prefix=""):
     return round(kept * full / 1e9, 4)
 
 
+def code_commit():
+    """Short hash of the checked-out commit, so a result file can be tied to the code that made it."""
+    import subprocess
+    try:
+        commit = subprocess.run(["git", "-C", str(REPO), "rev-parse", "--short", "HEAD"], capture_output=True,
+                                text=True, timeout=10).stdout.strip()
+    except Exception:
+        commit = ""
+    # A copy unpacked from a zip has no git history; the zip carries its version in CODE_VERSION instead.
+    version_file = REPO / "CODE_VERSION"
+    if not commit and version_file.exists():
+        commit = version_file.read_text().split()[0]
+    return commit or None
+
+
 def pick_device():
     if torch.cuda.is_available():
         return "cuda"
@@ -188,6 +216,22 @@ def main():
                         help="prefill the context in chunks of this many tokens so long prompts fit in "
                              "GPU memory (enables the full dev set). Compression is applied after each chunk.")
     parser.add_argument("--output-dir", type=Path, default=OUT_DIR)
+    parser.add_argument("--records", type=Path, default=None,
+                        help="JSON list of record_ids to run (e.g. harness/subsets/timing_100.json)")
+    parser.add_argument("--timing", action="store_true",
+                        help="record prefill time, time to first token, tokens per second and measured cache size")
+    parser.add_argument("--timing-repeats", type=int, default=3, help="with --timing: runs per record (median kept)")
+    parser.add_argument("--pack-bits", type=int, default=None, choices=[2, 4, 8, 16],
+                        help="store the kept cache packed at this many bits (16 = lossless) and report measured bytes")
+    parser.add_argument("--memory-budget", type=float, default=None,
+                        help="with --pack-bits: packed document cache as a fraction of the full cache; "
+                             "sets the press's eviction ratio per document (replaces --compression-ratio)")
+    parser.add_argument("--rdkv-packed", action="store_true",
+                        help="rdkv: store each layer in real packed buffers and report their measured size")
+    parser.add_argument("--rdkv-bitset", default=None,
+                        help="rdkv: allowed bit-widths, e.g. 0,16 for eviction only (default 0,2,4,8,16)")
+    parser.add_argument("--adaptive-policy", type=Path, default=None,
+                        help="policy file from harness/adaptive.py; picks --compression-ratio per record")
     parser.add_argument("--triattention-stats", type=Path, default=None,
                         help="TriAttention calibration file (default: members/samruddhi/calibration/llama31_8b_stats.pt)")
     args = parser.parse_args()
@@ -195,14 +239,38 @@ def main():
         parser.error("TurboQuant rate is selected by its bit setting; --compression-ratio must be 0")
     if (args.press == "turboquant_adaptive") != (args.turboquant_layer_config is not None):
         parser.error("--turboquant-layer-config must be used exactly with --press turboquant_adaptive")
+    if args.memory_budget is not None and not args.pack_bits:
+        parser.error("--memory-budget needs --pack-bits")
+    if args.pack_bits and args.pack_bits < 16 and (args.press in ("restorekv_4bit", "restorekv_2bit", "rdkv")
+                                                   or args.press.startswith("turboquant_")):
+        parser.error(f"{args.press} already quantizes; use --pack-bits 16, or its plain eviction press with --pack-bits")
+    use_driver = args.timing or bool(args.pack_bits)
+    if use_driver and args.chunk_prefill and args.press not in ("none", "kvzip", "restorekv"):
+        parser.error("--chunk-prefill with --timing/--pack-bits works for none, kvzip and restorekv only")
 
     tasks = set(args.tasks.split(",")) if args.tasks else None
     records = longbench.load_records(args.data, tasks=tasks, per_task=args.per_task,
                                      max_prompt_tokens=args.max_prompt_tokens)
+    if args.records:
+        wanted = set(json.loads(args.records.read_text()))
+        records = [r for r in records if r["record_id"] in wanted]
+    policy = None
+    if args.adaptive_policy:
+        import adaptive
+        policy = adaptive.load_policy(args.adaptive_policy)
 
     args.output_dir.mkdir(parents=True, exist_ok=True)
     ratio = args.compression_ratio if args.press != "none" else 0.0
-    out_file = args.output_dir / f"{args.model.split('/')[-1]}_{args.press}_{ratio}{args.out_tag}.jsonl"
+    # New modes get their own file names, so they never mix with the plain runs.
+    setting = f"budget{args.memory_budget}" if args.memory_budget is not None else str(ratio)
+    if policy:
+        setting = f"adaptive{policy['budget']}"
+    mode = (f"_pack{args.pack_bits}" if args.pack_bits else "") + ("_timing" if args.timing else "")
+    if args.rdkv_bitset:
+        mode += "_bits" + args.rdkv_bitset.replace(",", "-")
+    if args.rdkv_packed:
+        mode += "_packed"
+    out_file = args.output_dir / f"{args.model.split('/')[-1]}_{args.press}_{setting}{mode}{args.out_tag}.jsonl"
     run_fingerprint = None
     if args.press.startswith("turboquant_"):
         import hashlib
@@ -249,13 +317,16 @@ def main():
         saved_revisions = {json.loads(line).get("model_revision") for line in out_file.open()}
         if saved_revisions != {getattr(pipe.model.config, "_commit_hash", None)}:
             raise ValueError("loaded model revision differs from saved predictions; choose a new output directory")
-    press = make_press(args.press, ratio, args.turboquant_layer_config, args.triattention_stats)
+    press = make_press(args.press, ratio, args.turboquant_layer_config, args.triattention_stats,
+                       args.rdkv_packed, args.rdkv_bitset)
     if args.press.startswith("restorekv"):
         # Load the LoRA adapter now so it lands on the model's device (see members/anees/smoke_test.py)
         press.post_init_from_model(pipe.model)
         pipe.model.to(device)
 
     chat_template = pipe.tokenizer.chat_template
+    model_gpu_gb = torch.cuda.memory_allocated() / 1e9 if device == "cuda" else None
+    warm = args.timing  # the first timed call pays one-off start-up costs, so run one record unrecorded
     with out_file.open("a") as out:
         for i, record in enumerate(todo, 1):
             context, question = longbench.split_prompt(record)
@@ -266,12 +337,28 @@ def main():
             answer_prefix = ""
             if no_template:
                 question, answer_prefix = longbench.split_answer_cue(question)
+            if policy:
+                ratio = adaptive.choose_ratio(policy, record)
+                if press is not None:
+                    press.compression_ratio = ratio
+            served = None
+            if warm:
+                serve.serve(pipe, press, context, [question], answer_prefix, 2, args.pack_bits,
+                            args.memory_budget, args.chunk_prefill)
+                warm = False
             for d in range(n_gpus):
                 torch.cuda.reset_peak_memory_stats(d)
             start = time.perf_counter()
             fatal = False
             try:
-                if args.chunk_prefill:
+                if use_driver:
+                    runs = [serve.serve(pipe, press, context, [question], answer_prefix,
+                                        longbench.MAX_NEW_TOKENS[record["task"]], args.pack_bits,
+                                        args.memory_budget, args.chunk_prefill)
+                            for _ in range(args.timing_repeats if args.timing else 1)]
+                    served = runs[0]
+                    prediction = served["answers"][0]
+                elif args.chunk_prefill:
                     prediction = generate_chunked(
                         pipe, context, question, answer_prefix, press, ratio,
                         longbench.MAX_NEW_TOKENS[record["task"]], args.chunk_prefill)
@@ -355,8 +442,39 @@ def main():
                 n_question = len(pipe.tokenizer(question + answer_prefix, add_special_tokens=False).input_ids)
                 row["rdkv_kv_cache_gb"] = round(s["kv_cache_gb"]
                                                 + n_question * kv_bytes_per_token(pipe.model.config) / 1e9, 4)
+                if s.get("packed_gb") is not None:
+                    # Measured: bytes of the packed buffers RDKV's cache was written into (rdkv_pack.py).
+                    row["document_cache_gb_measured"] = round(s["packed_gb"], 6)
+                    row["document_cache_share_measured"] = round(s["packed_gb"] / s["kv_cache_gb_full"], 4)
+                    row["kv_cache_gb_measured"] = round(s["packed_gb"] + n_question
+                                                        * kv_bytes_per_token(pipe.model.config) / 1e9, 6)
             if args.dtype != "bfloat16" or args.device_map:
                 row["run_config"] = f"{args.dtype},{args.device_map or device}"
+            if served is not None and not oom:
+                # Measured, not computed: bytes of the tensors the cache holds for the document.
+                full = kv_bytes_per_token(pipe.model.config)
+                row["document_cache_gb_measured"] = round(served["document_cache_bytes"] / 1e9, 6)
+                row["document_cache_share_measured"] = round(served["document_cache_bytes"]
+                                                             / served["full_document_cache_bytes"], 4)
+                row["kv_cache_gb_measured"] = round((served["document_cache_bytes"]
+                                                     + served["question_tokens"][0] * full) / 1e9, 6)
+                row["eviction_ratio"] = served["eviction_ratio"]
+                if served["packed"]:
+                    row["pack_bits"] = args.pack_bits
+                    row["kv_cache_gb"] = row["kv_cache_gb_measured"]  # packed runs report what is really stored
+                    row["kept_pairs_share"] = round(served["packed"]["kept_slots"] / served["packed"]["total_slots"], 4)
+                if args.press.startswith("turboquant_"):
+                    # TurboQuant's layer also keeps a decoded copy for speed; its stored size is its packed codes.
+                    row["decoded_copy_gb"] = row["document_cache_gb_measured"]
+                    row["document_cache_gb_measured"] = round(press.stats["packed_bytes"] / 1e9, 6)
+                    row["document_cache_share_measured"] = round(press.stats["packed_bytes"]
+                                                                 / served["full_document_cache_bytes"], 4)
+                    row["kv_cache_gb_measured"] = row["kv_cache_gb"]
+                if args.timing:
+                    row["timing"] = serve.median_timing(runs)
+                    row["model_gpu_gb"] = round(model_gpu_gb, 2) if model_gpu_gb is not None else None
+            if policy:
+                row["adaptive_ratio"] = ratio
             out.write(json.dumps(row) + "\n")
             out.flush()
             if not oom:
@@ -371,8 +489,10 @@ def main():
     rows = [r for r in rows if r["record_id"] in {rec["record_id"] for rec in records}]
     summary = longbench.summarize(rows)
     summary_file = out_file.with_suffix(".summary.json")
-    summary_file.write_text(json.dumps({"args": {**vars(args), "output_dir": str(args.output_dir),
-                                        "turboquant_layer_config": str(args.turboquant_layer_config) if args.turboquant_layer_config else None}, "device": device, "n_records": len(rows),
+    saved_args = {k: (str(v) if isinstance(v, Path) else v) for k, v in vars(args).items()}
+    summary_file.write_text(json.dumps({"args": saved_args, "device": device,
+                                        "gpu": torch.cuda.get_device_name(0) if device == "cuda" else None,
+                                        "code_commit": code_commit(), "n_records": len(rows),
                                         "scores": summary}, indent=2))
     for task, value in summary.items():
         print(f"{task:22s} {value:6.2f}")
