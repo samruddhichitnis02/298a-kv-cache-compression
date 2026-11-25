@@ -1,0 +1,13 @@
+# What the harness needs on top of a PyTorch image. Checked on the lab image
+# (pytorch:latest, torch 2.7.1+cu128, RTX 5090) on November 25, 2026.
+#
+#   pip install -r requirements.txt
+#
+# torch is pinned to the lab image's version so pip does not replace the build that works on
+# the RTX 5090. On another machine, change this line to the torch you already have.
+torch==2.7.1
+transformers==5.2.0
+kvpress==0.5.5
+rapidfuzz
+rouge
+pytest

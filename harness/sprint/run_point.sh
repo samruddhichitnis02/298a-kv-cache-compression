@@ -59,6 +59,7 @@ hybrid)
     # Point 1. Eviction only, hybrid at 4 bits and hybrid at 2 bits, all at 10% of the full document
     # cache in measured bytes; then quantization only. 400 records (25 per task) unless FULL=1.
     SIZE="--per-task 25"; [ "${FULL:-}" = "1" ] && SIZE=""
+    [ "$SMOKE" = "smoke" ] && SIZE=""     # the smoke run sets its own --per-task 1
     for press in restorekv kvzip snapkv triattention; do
         extra=""; [ "$press" = "triattention" ] && extra="$(tri_stats)"
         for bits in 4 16 2; do

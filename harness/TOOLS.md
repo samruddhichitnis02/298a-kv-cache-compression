@@ -12,7 +12,7 @@ Five tools, built once, so every method is measured the same way. Each member ru
 
 All five run through one driver, `harness/serve.py`: prefill the document under the press, optionally pack the cache, answer one or more questions, and time each step.
 
-**Status.** Everything here was built and tested on a laptop (40 unit tests, and end-to-end runs on Qwen2.5-0.5B). Nothing has run on Llama-3.1-8B on a GPU yet. Do a short smoke run before a long one.
+**Status.** Unit tests pass (38: 25 in `harness/`, 13 in `members/manjot/test_rdkv.py`). On November 25 the smoke run of all four points finished on Llama-3.1-8B on the lab RTX 5090 with no failed run (29 runs, commit `8c257cd`), and 64,000-token documents fit with `--chunk-prefill 8192` (peak 28.66 GB with the full cache). Smoke runs are one or two records each, so no full-size run has finished yet. Still do a short smoke run before a long one.
 
 ## One command per point
 
@@ -28,8 +28,11 @@ Points: `hybrid` (point 1), `timing` (point 3), `many` and `long` (point 4). The
 ## Before you start
 
 ```bash
-python -m pytest -q harness/test_serve.py harness/test_tools.py     # 40 tests, CPU, a few seconds
+pip install -r requirements.txt     # the lab image has torch only; this keeps its torch build
+python -m pytest -q harness/test_serve.py harness/test_tools.py members/manjot/test_rdkv.py     # 38 tests, CPU
 ```
+
+The lab image has no `unzip`: unpack the data with `python -m zipfile -e ../processed_longbench.zip data/`.
 
 Shared record lists (`harness/subsets/`):
 
@@ -109,6 +112,8 @@ Each row gets a `timing` block, the median over `--timing-repeats` runs (default
 | `tokens_per_s` | Decoding speed after the first token, including any unpacking |
 | `document_cache_gb_measured` | Bytes of the tensors the cache really holds |
 | `peak_gpu_gb`, `model_gpu_gb` | Peak GPU memory for the record, and the model alone |
+
+The last two rows of the table, `document_cache_gb_measured`, `peak_gpu_gb` and `model_gpu_gb`, are fields of the row itself, next to `timing`, not inside it.
 
 - **Compression overhead** is your method's `prefill_s` minus the full cache's `prefill_s` on the same record. Run `--press none --timing` once on the same machine.
 - **Measured memory without packing** is the full size for presses that only hide pairs. That is the honest number: say "simulated" for those, or pack them.
