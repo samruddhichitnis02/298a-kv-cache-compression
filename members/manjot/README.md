@@ -41,19 +41,3 @@ cache *including* quantizer metadata (fp16 scale/zero-point per quantized token 
 uncompressed question tokens, counted the same way as the baseline's `kv_cache_gb`. Other per-row fields:
 `rdkv_context_gb` (context only, with metadata), `rdkv_context_gb_payload` (context only, without metadata) and
 `rdkv_kept_fraction_bits` / `_tokens`.
-
-## How the implementation works (for the report)
-Once, at the end of prefill, per layer and KV head:
-1. **Scores.** V: per-token attention mass from the last 32 queries, summed over the GQA group, AvgPool1d(5).
-   K: per-channel `‖Q[:,c]‖·‖K[:,c]‖/√d`.
-2. **V allocation over tokens.** Each token picks b ∈ {0,2,4,8,16} minimising Σ w_t·ε_t(b) under the V budget
-   (Lagrangian relaxation + bisection on λ, ≤64 steps, 1 % tolerance). b=0 ⇒ evicted.
-3. **K allocation over channels**, only over kept tokens, same solver. b=0 ⇒ channel removed.
-Budget per head = (1−r)·T·d·16 bits for V and the same for K (paper's r_K = 0.5). New decode tokens stay FP16.
-
-**Deviations from the paper (state them honestly):**
-- ε_u(b) is the exact per-unit RMS quantisation error computed online, not the paper's offline calibrated table.
-- The **values** of the last 32 context tokens are always kept at FP16 (SnapKV convention) and charged to the V budget. Their **keys** are not exempt: they go through the per-channel K allocation like every other kept token.
-- No TriZone packing / Triton kernels: quantisation is simulated (quantise→dequantise) and eviction is masked, so
-  physical GPU memory doesn't drop — same as KVzip/RestoreKV in our comparison; we report computed size.
-- Uniform budget per head and layer, as in the paper.
