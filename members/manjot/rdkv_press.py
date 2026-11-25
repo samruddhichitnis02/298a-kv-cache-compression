@@ -156,6 +156,8 @@ class RDKVPress(BasePress):
     kernel_size: int = 5  # AvgPool1d kernel
     k_share: float = 0.5  # r_K, fraction of the head budget given to K
     bitset: tuple = BITSET
+    # Store each layer in real packed buffers (rdkv_pack.py), use what they decode to, and report their size.
+    measure_packed: bool = False
     # filled during the forward pass (one prefill = one record)
     stats: dict = field(default_factory=dict, init=False, repr=False)
 
@@ -168,7 +170,7 @@ class RDKVPress(BasePress):
     # ---- bookkeeping -------------------------------------------------------------------
     def _reset_stats(self):
         self.stats = {"payload_bits": 0.0, "meta_bits": 0.0, "full_bits": 0.0, "kept_tokens": 0.0,
-                      "total_tokens": 0.0, "layers": 0, "v_bit_hist": [0] * len(self.bitset),
+                      "total_tokens": 0.0, "layers": 0, "packed_bytes": 0.0, "v_bit_hist": [0] * len(self.bitset),
                       "k_bit_hist": [0] * len(self.bitset)}
 
     def kv_cache_gb(self, include_meta: bool = True) -> float:
@@ -185,6 +187,7 @@ class RDKVPress(BasePress):
             "kv_cache_gb": self.kv_cache_gb(True),
             "kv_cache_gb_payload": self.kv_cache_gb(False),
             "kv_cache_gb_full": self.full_cache_gb(),
+            "packed_gb": s["packed_bytes"] / 1e9 if self.measure_packed else None,   # measured, see rdkv_pack.py
             "kept_fraction_bits": (s["payload_bits"] + s["meta_bits"]) / full,
             "kept_fraction_tokens": s["kept_tokens"] / max(s["total_tokens"], 1.0),
             "v_bit_hist": dict(zip(self.bitset, s["v_bit_hist"])),
@@ -289,6 +292,16 @@ class RDKVPress(BasePress):
         K = K.masked_fill_((idx_k == 0)[:, :, None, :], 0.0)  # removed channels
         keys_out = K.to(keys.dtype)
         del K
+
+        if self.measure_packed:
+            # Write the layer into real packed buffers and attend to what they decode to.
+            from rdkv_pack import nbytes, pack_layer, unpack_layer
+            if B != 1:
+                raise ValueError("measure_packed supports batch size 1")
+            value_bits = torch.cat([bitset[idx_v[0]], torch.full((H, W), 16.0, device=dev)], dim=-1).long()
+            packed = pack_layer(keys, values, value_bits, bitset[idx_k[0]].long(), kept[0])
+            keys_out, values_out = unpack_layer(packed, keys, values, kept[0])
+            self.stats["packed_bytes"] += float(nbytes(packed))
 
         # evicted tokens -> kvpress attention mask (same mechanism as AdaKVPress)
         bi, hi, si = torch.nonzero(~kept, as_tuple=True)

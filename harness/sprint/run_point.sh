@@ -67,6 +67,10 @@ hybrid)
     done
     longbench hybrid/longbench --press none --pack-bits 4 $SIZE
     longbench hybrid/longbench --press none --pack-bits 2 $SIZE
+    # RDKV mixes bit-widths, so it has its own packing (members/manjot/rdkv_pack.py): the hybrid, then its
+    # eviction-only half (bit-widths 0 and 16 only) at the same budget.
+    longbench hybrid/longbench --press rdkv --compression-ratio 0.9 --rdkv-packed $SIZE
+    longbench hybrid/longbench --press rdkv --compression-ratio 0.9 --rdkv-bitset 0,16 --rdkv-packed $SIZE
     ;;
 timing)
     # Point 3. The same 100 records for every method, 3 repeats each, full cache first.

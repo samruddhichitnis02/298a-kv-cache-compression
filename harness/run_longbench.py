@@ -98,9 +98,13 @@ def make_turboquant_press(name, layer_config=None):
     return TurboQuantPress(bits=float(match.group(2)), qjl_keys=match.group(1) is None)
 
 
-def make_press(name, compression_ratio, layer_config=None, triattention_stats=None):
+def make_press(name, compression_ratio, layer_config=None, triattention_stats=None, rdkv_packed=False,
+               rdkv_bitset=None):
     if name == "none":
         return None
+    if name == "rdkv" and (rdkv_packed or rdkv_bitset):
+        options = {"bitset": tuple(int(b) for b in rdkv_bitset.split(","))} if rdkv_bitset else {}
+        return RDKVPress(compression_ratio=compression_ratio, measure_packed=rdkv_packed, **options)
     if name == "triattention" and triattention_stats:
         return TriAttentionPress(compression_ratio=compression_ratio, stats_path=str(triattention_stats))
     if name in ("restorekv_4bit", "restorekv_2bit"):
@@ -217,6 +221,10 @@ def main():
     parser.add_argument("--memory-budget", type=float, default=None,
                         help="with --pack-bits: packed document cache as a fraction of the full cache; "
                              "sets the press's eviction ratio per document (replaces --compression-ratio)")
+    parser.add_argument("--rdkv-packed", action="store_true",
+                        help="rdkv: store each layer in real packed buffers and report their measured size")
+    parser.add_argument("--rdkv-bitset", default=None,
+                        help="rdkv: allowed bit-widths, e.g. 0,16 for eviction only (default 0,2,4,8,16)")
     parser.add_argument("--adaptive-policy", type=Path, default=None,
                         help="policy file from harness/adaptive.py; picks --compression-ratio per record")
     parser.add_argument("--triattention-stats", type=Path, default=None,
@@ -253,6 +261,10 @@ def main():
     if policy:
         setting = f"adaptive{policy['budget']}"
     mode = (f"_pack{args.pack_bits}" if args.pack_bits else "") + ("_timing" if args.timing else "")
+    if args.rdkv_bitset:
+        mode += "_bits" + args.rdkv_bitset.replace(",", "-")
+    if args.rdkv_packed:
+        mode += "_packed"
     out_file = args.output_dir / f"{args.model.split('/')[-1]}_{args.press}_{setting}{mode}{args.out_tag}.jsonl"
     run_fingerprint = None
     if args.press.startswith("turboquant_"):
@@ -300,7 +312,8 @@ def main():
         saved_revisions = {json.loads(line).get("model_revision") for line in out_file.open()}
         if saved_revisions != {getattr(pipe.model.config, "_commit_hash", None)}:
             raise ValueError("loaded model revision differs from saved predictions; choose a new output directory")
-    press = make_press(args.press, ratio, args.turboquant_layer_config, args.triattention_stats)
+    press = make_press(args.press, ratio, args.turboquant_layer_config, args.triattention_stats,
+                       args.rdkv_packed, args.rdkv_bitset)
     if args.press.startswith("restorekv"):
         # Load the LoRA adapter now so it lands on the model's device (see members/anees/smoke_test.py)
         press.post_init_from_model(pipe.model)
@@ -424,6 +437,12 @@ def main():
                 n_question = len(pipe.tokenizer(question + answer_prefix, add_special_tokens=False).input_ids)
                 row["rdkv_kv_cache_gb"] = round(s["kv_cache_gb"]
                                                 + n_question * kv_bytes_per_token(pipe.model.config) / 1e9, 4)
+                if s.get("packed_gb") is not None:
+                    # Measured: bytes of the packed buffers RDKV's cache was written into (rdkv_pack.py).
+                    row["document_cache_gb_measured"] = round(s["packed_gb"], 6)
+                    row["document_cache_share_measured"] = round(s["packed_gb"] / s["kv_cache_gb_full"], 4)
+                    row["kv_cache_gb_measured"] = round(s["packed_gb"] + n_question
+                                                        * kv_bytes_per_token(pipe.model.config) / 1e9, 6)
             if args.dtype != "bfloat16" or args.device_map:
                 row["run_config"] = f"{args.dtype},{args.device_map or device}"
             if served is not None and not oom:
@@ -439,6 +458,13 @@ def main():
                     row["pack_bits"] = args.pack_bits
                     row["kv_cache_gb"] = row["kv_cache_gb_measured"]  # packed runs report what is really stored
                     row["kept_pairs_share"] = round(served["packed"]["kept_slots"] / served["packed"]["total_slots"], 4)
+                if args.press.startswith("turboquant_"):
+                    # TurboQuant's layer also keeps a decoded copy for speed; its stored size is its packed codes.
+                    row["decoded_copy_gb"] = row["document_cache_gb_measured"]
+                    row["document_cache_gb_measured"] = round(press.stats["packed_bytes"] / 1e9, 6)
+                    row["document_cache_share_measured"] = round(press.stats["packed_bytes"]
+                                                                 / served["full_document_cache_bytes"], 4)
+                    row["kv_cache_gb_measured"] = row["kv_cache_gb"]
                 if args.timing:
                     row["timing"] = serve.median_timing(runs)
                     row["model_gpu_gb"] = round(model_gpu_gb, 2) if model_gpu_gb is not None else None

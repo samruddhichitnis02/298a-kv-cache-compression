@@ -53,7 +53,9 @@ python harness/run_longbench.py --press none  --pack-bits 2                     
 Each row gets `document_cache_share_measured` (packed document bytes over the full document cache), `kv_cache_gb_measured` (document plus question), `eviction_ratio` and `kept_pairs_share`. For packed runs `kv_cache_gb` is the measured value.
 
 - **Quantization only cannot reach every budget.** With scales and zero points, 4-bit is about 31% of the full cache and 2-bit about 19%. Report those as they are.
-- **Which presses work.** Any press that leaves a normal cache: `none`, `snapkv`, `kvzip`, `restorekv`, `triattention`. `restorekv_4bit`, `restorekv_2bit`, `rdkv` and TurboQuant already quantize, so they only take `--pack-bits 16`. RDKV's mixed precision and TurboQuant's codes need their own packing. ResidualKV runs outside this harness.
+- **Which presses work.** Any press that leaves a normal cache: `none`, `snapkv`, `kvzip`, `restorekv`, `triattention`. `restorekv_4bit`, `restorekv_2bit` and TurboQuant already quantize, so they only take `--pack-bits 16`. ResidualKV runs outside this harness.
+- **RDKV has its own packing,** because it mixes bit-widths: `--press rdkv --compression-ratio 0.9 --rdkv-packed` writes each layer into real packed buffers (`members/manjot/rdkv_pack.py`), attends to what they decode to, and reports their size in the same `document_cache_share_measured` column. `--rdkv-bitset 0,16` gives RDKV's eviction-only half. On a small model the measured size was 10.6% where RDKV's own formula says 10.5%.
+- **TurboQuant** reports its packed codes as the measured size. Its cache also keeps a decoded copy for speed, recorded as `decoded_copy_gb`.
 - **Lossless check.** With `--pack-bits 16` the answers should match the masked run. On the small model they matched on 5 of 7 records with KVzip (two long code completions diverged late) and 7 of 7 with SnapKV. Hiding a pair with a fake key is not exactly the same arithmetic as removing it.
 - **Cost.** Each decoding step unpacks every layer. That time is in `tokens_per_s` when you add `--timing`.
 
@@ -128,9 +130,22 @@ Tasks: `single`, `multikey`, `multivalue`, `multiquery` (one question each) and 
 - **Long documents.** `--chunk-prefill N` feeds the document in pieces so it fits in memory. It gives the same answers as one pass (checked on the small model, with and without KVzip). It works for `none`, `kvzip` and `restorekv`. SnapKV, TriAttention and RDKV compress inside the prefill pass and need the whole document at once, so their limit is whatever fits on the GPU.
 - `--pack-bits` and `--memory-budget` work here too.
 
+## Tables for the report
+
+```bash
+python harness/sprint/make_tables.py            # every point that has results
+python harness/sprint/make_tables.py timing
+```
+
+Writes one Markdown table per point to `results/sprint/`, straight from the result files: score against measured bytes (point 1), timings with overhead against the full cache and sessions per 32 GB (point 3), score by number of questions (point 4), and score by document length (point 4).
+
+## ResidualKV
+
+ResidualKV runs on the authors' code, so it has its own runner for the needle documents: `members/charvee/run_residualkv_needles.py`. It compresses the document alone, then answers each question from a copy of that cache, and writes the same row format. It has not been run on a GPU yet; its docstring lists what to check first.
+
 ## Known limits
 
 - Not yet run on a GPU or on Llama-3.1-8B. Timing uses a GPU synchronize call that the laptop tests never exercise on CUDA.
 - Whether a 64K document fits on a 32 GB card, even with chunked prefill, is untested. The full cache alone is about 8 GB at 64K and 16 GB at 128K, on top of the 16 GB model.
-- Packing covers uniform bit-widths. RDKV, TurboQuant and ResidualKV need their owners to report their own packed sizes.
+- ResidualKV's real packed size is still its owner's to measure; its runner reports the size of the tensors its cache holds.
 - The adaptive rule is a first version; see the table above.
