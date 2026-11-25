@@ -8,7 +8,8 @@ Picks 50 records per task (seed 42) from the 2,931 cleaned records outside the d
 Records whose document (whitespace-normalised context) also appears in the dev set are used
 only when a task has fewer than 50 document-disjoint records (NarrativeQA has none, QMSum 49),
 and every such record is listed in the output so the overlap is disclosed, not hidden.
-Writes Data_pipeline/processed_longbench/test_ids.json.
+Writes Data_pipeline/processed_longbench/test_ids.json, and train_ids.json with the remaining
+records: a calibration pool for fitting method statistics, never used for evaluation.
 """
 
 import hashlib
@@ -20,6 +21,7 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[2]
 DATA = REPO / "data" / "processed_longbench"
 OUT = REPO / "Data_pipeline" / "processed_longbench" / "test_ids.json"
+TRAIN_OUT = OUT.with_name("train_ids.json")
 PER_TASK, SEED = 50, 42
 
 
@@ -58,6 +60,12 @@ def main():
         "shares_dev_document": sorted(overlap),
         "test_ids": sorted(test),
     }, indent=1) + "\n")
+    train = sorted(r["record_id"] for r in full if r["record_id"] not in dev_ids and r["record_id"] not in set(test))
+    assert len(train) + len(test) + len(dev_ids) == len(full)
+    TRAIN_OUT.write_text(json.dumps({
+        "role": "train / calibration pool: for fitting method statistics only; never evaluated on",
+        "n_records": len(train), "train_ids": train}, indent=1) + "\n")
+    print(f"{len(train)} train/calibration records; wrote {TRAIN_OUT}")
     print(f"{len(test)} test records, {len(overlap)} share a document with dev; wrote {OUT}")
     for task, row in per_task.items():
         print(f"  {task:22s} {row}")
