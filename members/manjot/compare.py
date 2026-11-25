@@ -1,6 +1,6 @@
 """Paired comparison of a run against the shared full-cache baseline (same record_ids only).
 
-    python members/manjot/compare.py results/longbench/Llama-3.1-8B-Instruct_rdkv_0.9.jsonl
+    python members/manjot/compare.py results/rdkv/longbench/Llama-3.1-8B-Instruct_rdkv_0.9.jsonl
     python members/manjot/compare.py RUN.jsonl --baseline OTHER.jsonl
 """
 import argparse

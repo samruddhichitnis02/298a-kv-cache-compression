@@ -4,13 +4,31 @@
 {0, 2, 4, 8, 16}: 0 means evicted, 16 means kept in bf16. V is allocated per token and K per channel, by rate-distortion
 bit allocation. No official code is public, so `rdkv_press.py` is our re-implementation as a kvpress press.
 
+How the implementation works, how it differs from the paper, and the full results are in the report section:
+[`docs/MANJOT_REPORT_CHAPTER.md`](docs/MANJOT_REPORT_CHAPTER.md).
+
+## Results
+
+LongBench validation set, 800 records per run, bf16 on one RTX 5090 (RunPod), no out-of-memory failures. Files are in
+`results/rdkv/longbench/`. Full cache: 47.72.
+
+| Ratio | Score | vs full cache | Memory (`rdkv_kv_cache_gb`, share of full cache) |
+|---|---|---|---|
+| 0.75 | 47.16 | -0.55 | 26.7% |
+| 0.8 | 46.92 | -0.80 | 21.7% |
+| 0.9 | 42.58 | -5.14 | 11.6% |
+| 0.95 | 38.03 | -9.69 | 6.6% |
+
+RDKV is in the team comparison (`results/comparison/COMPARISON.md`).
+
 | File | What |
 |---|---|
 | `rdkv_press.py` | `RDKVPress`, registered as `--press rdkv` in `harness/run_longbench.py` |
 | `test_rdkv.py` | CPU unit tests (allocator hits each budget, end-to-end on a tiny random Llama). `python -m pytest -q members/manjot/test_rdkv.py` |
 | `compare.py` | Paired per-task comparison of any run against the full-cache baseline |
 | `kaggle_rdkv.ipynb` | Kaggle 2xT4 notebook (fp16 side check only, not the main table): setup, tests, data rebuild, smoke run, fp16 check, full runs |
-| `colab_rdkv.ipynb` | Colab A100 notebook for the reported results: clones this branch, pins `transformers==5.2.0`, bf16 on one GPU (the baseline's setup); results saved to Drive, resumes after disconnects |
+| `colab_rdkv.ipynb` | Colab A100 notebook used for earlier runs (those files are not in the repo; the reported results are the RTX 5090 runs above): clones the branch, pins `transformers==5.2.0`, bf16 on one GPU; results saved to Drive, resumes after disconnects |
+| `docs/MANJOT_REPORT_CHAPTER.md` | Report section: method, differences from the paper, results, comparisons, limits |
 
 ## Running
 
