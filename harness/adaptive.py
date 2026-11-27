@@ -255,7 +255,8 @@ def evaluate(runs, records, target, signals=None, clusters=CLUSTERS, repeats=1):
             allowed += outcome(runs, {i: target for i in test})[1]
             budget = sum(memory(runs[target][i]) for i in fit)
             task_choice = allocate(group_tables(runs, {i: tasks[i] for i in fit}), budget, target)
-            by_label.append(outcome(runs, {i: task_choice[tasks[i]] for i in test})[0])
+            # a task with no records in the fitting half keeps the fixed setting
+            by_label.append(outcome(runs, {i: task_choice.get(tasks[i], target) for i in test})[0])
         adaptive.append(sum(scores) / 2)
         per_task.append(sum(by_label) / 2)
         memory_share.append(used / allowed)

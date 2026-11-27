@@ -42,7 +42,7 @@ Python 3.11, with a CUDA GPU for real runs. The code also runs on Apple Silicon 
 ```bash
 git clone https://github.com/samruddhichitnis02/298a-kv-cache-compression.git
 cd 298a-kv-cache-compression
-pip install kvpress rouge rapidfuzz datasets
+pip install -r requirements.txt   # transformers 5.2.0, kvpress 0.5.5, rapidfuzz, rouge; see the note in the file about torch
 huggingface-cli login   # Llama-3.1-8B-Instruct needs the accepted Meta license
 ```
 

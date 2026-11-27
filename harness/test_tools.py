@@ -113,3 +113,13 @@ def test_allocation_keeps_the_fixed_setting_when_it_is_the_only_one_that_fits():
     # equal memory, different scores: the better one wins without exceeding the budget
     same = {"plain": {"g1": (10.0, 1.0)}, "quantized": {"g1": (30.0, 1.0)}}
     assert adaptive.allocate(same, 1.0, "plain") == {"g1": "quantized"}
+
+
+def test_evaluate_copes_with_a_task_missing_from_one_half():
+    runs, records = synthetic_runs(40)
+    ids = sorted(records)
+    runs["0.7"] = {i: {**runs["0.9"][i], "compression_ratio": 0.7, "kv_cache_gb": 0.3, "score": 0.45} for i in ids}
+    for setting in runs:                      # one record of a task nobody else has
+        runs[setting][ids[0]] = {**runs[setting][ids[0]], "task": "lonely"}
+    result = adaptive.evaluate(runs, records, "0.7", clusters=4, repeats=3)
+    assert result["per_task_held_out"] > 0
