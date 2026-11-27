@@ -74,9 +74,24 @@ A deployed system does not know the task. The rule in `harness/adaptive.py` uses
 - **At about 21% memory no method gains reliably.** RestoreKV, KVzip and RDKV are already close to the full cache there. SnapKV and TriAttention are not, but adapting does not help them there either; we have not found out why.
 - **So the two ideas substitute for each other.** Adaptive budgets recover 2 to 3 points for eviction at 11% memory. Adding 4-bit quantization recovers 4 points at the same memory with one fixed setting, and leaves nothing for adaptivity to add.
 
+## Finding 5: the gain holds when the rule is fitted on separate records
+
+Findings 3 and 4 fit and score the rule on halves of the validation records. For a cleaner test we ran RestoreKV on 300 training records at keep ratios 0.9, 0.75, 0.95 and 0.8, fitted the rule on those alone, and then ran all 800 validation records with the fitted rule choosing each prompt's ratio. This is a real run on the RTX 5090, not a lookup in existing results.
+
+| RestoreKV, 800 validation records | Score | Mean cache | Share of full cache |
+|---|---|---|---|
+| Fixed ratio 0.9 | 43.29 | 0.1542 GB | 11.4% |
+| Adaptive, fitted on training records | 44.93 | 0.1520 GB | 11.2% |
+| Gain | +1.64 | 99% of fixed | |
+
+- **The rule gains 1.64 points at slightly less memory,** with no validation record used to fit it. That is inside the range Finding 3 estimated (+2.02 ± 0.58).
+- **The fitted rule uses three of the four ratios:** of the 24 content types, 4 get ratio 0.8, 10 get 0.9 and 10 get 0.95. None gets 0.75.
+- **Within the training records the held-out gain is smaller:** +0.79 (fixed 44.76, adaptive 45.56, at 101% of fixed memory, 20 splits of 300 records). We report both. One validation run is a single measurement, so the true gain is likely between the two.
+- **Knowing the task would still do better on the training records:** 46.76 held out, against 45.56 for the rule. With only 300 records to fit on, the rule is weaker than in Finding 3.
+
 ## Limits
 
-- The per-task results in Finding 2 use the task label. Finding 3 does not, but the number of content types (24) was chosen on these same validation results, where gains level off between 16 and 32 types. A cleaner test fits the rule on the 300-record training sample and scores it on all 800 records; that needs GPU runs of the training sample.
+- The per-task results in Finding 2 use the task label. Finding 3 does not, but the number of content types (24) was chosen on the validation results, where gains level off between 16 and 32 types. Finding 5 fits on training records only, but it covers one method (RestoreKV) at one memory level and keeps the same 24 types.
 - Finding 2 uses one split and Findings 3 and 4 use 20, so their held-out per-task numbers differ slightly.
 - The rule uses text statistics only. A signal from the method itself, such as how concentrated its importance scores are, has not been tried.
 - Memory is computed, not measured on the GPU.
