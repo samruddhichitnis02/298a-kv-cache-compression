@@ -47,7 +47,7 @@ def method(press):
 
 def hybrid(folder):
     lines = ["| Method | Strategy | Records | Measured document cache | Score |", "|---|---|---|---|---|"]
-    table = []
+    table, ids = [], None
     for path in sorted(folder.glob("*.jsonl")):
         rows = [r for r in rows_of(path) if not r.get("oom")]
         if not rows or rows[0].get("document_cache_share_measured") is None:
@@ -61,6 +61,13 @@ def hybrid(folder):
             strategy = "eviction only" if bits == 16 else f"hybrid, {bits}-bit"
         share = mean([r["document_cache_share_measured"] for r in rows])
         table.append((share, f"| {method(press)} | {strategy} | {len(rows)} | {100 * share:.1f}% | {macro(rows):.2f} |"))
+        ids = {r["record_id"] for r in rows} if ids is None else ids & {r["record_id"] for r in rows}
+    # The uncompressed model on the same records, from the baseline run: the hybrid runs use a subset,
+    # so their scores are compared with this row and not with the baseline's score on all records.
+    for path in sorted((folder.parents[1] / "longbench").glob("*_none_0.0.jsonl")):
+        rows = [r for r in rows_of(path) if ids and r["record_id"] in ids and not r.get("oom")]
+        if rows:
+            table.append((1.0, f"| Full cache | none (baseline run, same records) | {len(rows)} | 100.0% | {macro(rows):.2f} |"))
     return lines + [line for _, line in sorted(table)]
 
 
